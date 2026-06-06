@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maybank Financial Analysis FY2025</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
+body{background:#0f0f1a;color:#e0e0e0;padding:20px}
+.container{max-width:1400px;margin:0 auto}
+
+.header{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);border-radius:16px;padding:30px 40px;margin-bottom:24px;border:1px solid rgba(255,255,255,.08)}
+.header h1{font-size:2.2rem;font-weight:700;color:#fff}
+.header .ticker{color:#e94560;font-weight:600;font-size:1.1rem}
+.header .sub{color:#a0a0b8;margin-top:6px;font-size:.95rem}
+.header .price{font-size:2rem;font-weight:700;color:#4ecca3;margin-top:8px}
+.header .price span{font-size:1rem;color:#a0a0b8;font-weight:400}
+
+.tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.tab-btn{padding:10px 22px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#a0a0b8;cursor:pointer;font-size:.9rem;font-weight:500;transition:.2s}
+.tab-btn:hover{background:rgba(255,255,255,.1);color:#fff}
+.tab-btn.active{background:#e94560;color:#fff;border-color:#e94560}
+
+.grid{display:grid;gap:16px;margin-bottom:20px}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-2{grid-template-columns:1fr 1fr}
+
+.card{background:linear-gradient(145deg,#1a1a2e,#16162a);border-radius:14px;padding:20px;border:1px solid rgba(255,255,255,.06);transition:.2s}
+.card:hover{border-color:rgba(255,255,255,.15)}
+
+.card .label{font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;color:#7a7a9a;margin-bottom:4px}
+.card .value{font-size:1.6rem;font-weight:700;color:#fff}
+.card .change{font-size:.85rem;margin-top:2px}
+.card .change.pos{color:#4ecca3}
+.card .change.neg{color:#e94560}
+.card .change.neu{color:#a0a0b8}
+
+.card-chart{height:260px;position:relative}
+
+.table-wrap{overflow-x:auto;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{text-align:left;padding:10px 12px;color:#7a7a9a;font-weight:600;text-transform:uppercase;font-size:.75rem;letter-spacing:.5px;border-bottom:1px solid rgba(255,255,255,.08)}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);color:#c0c0d0}
+tr:hover td{background:rgba(255,255,255,.03)}
+td.pos{color:#4ecca3}
+td.neg{color:#e94560}
+
+.section-title{font-size:1.1rem;font-weight:600;color:#fff;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title .count{font-size:.75rem;background:#e94560;padding:2px 10px;border-radius:20px;color:#fff}
+
+.tag{display:inline-block;padding:3px 10px;border-radius:6px;font-size:.75rem;margin:2px 4px 2px 0}
+.tag.green{background:rgba(78,204,163,.15);color:#4ecca3}
+.tag.red{background:rgba(233,69,96,.15);color:#e94560}
+.tag.blue{background:rgba(15,52,96,.4);color:#8ab4f8}
+
+.verdict{background:linear-gradient(135deg,rgba(78,204,163,.08),rgba(78,204,163,.02));border:1px solid rgba(78,204,163,.2);border-radius:14px;padding:24px;margin-top:16px}
+.verdict h3{color:#4ecca3;margin-bottom:8px}
+.verdict p{color:#b0b0c8;line-height:1.6;font-size:.9rem}
+.verdict .risks{color:#e94560}
+
+@media(max-width:900px){
+.grid-4,.grid-3,.grid-2{grid-template-columns:repeat(2,1fr)}
+.header{padding:20px}
+.header h1{font-size:1.5rem}
+}
+@media(max-width:550px){
+.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<div class="header">
+<div><span class="ticker">KLSE: MAYBANK (1155)</span> <span style="color:#7a7a9a;font-size:.85rem">| Malayan Banking Berhad</span></div>
+<h1>Financial Analysis <span style="color:#e94560;">FY2025</span></h1>
+<div class="price">RM9.92 <span>as of Nov 2025 &middot; Market Cap ~RM120B</span></div>
+<div class="sub">ASEAN's leading financial services group &middot; 44,000+ employees &middot; 18 countries</div>
+</div>
+
+<div class="tabs" id="tabs">
+<button class="tab-btn active" data-tab="overview">Overview</button>
+<button class="tab-btn" data-tab="income">Profit &amp; Revenue</button>
+<button class="tab-btn" data-tab="balance">Balance Sheet</button>
+<button class="tab-btn" data-tab="ratios">Key Ratios</button>
+<button class="tab-btn" data-tab="segment">Segments</button>
+</div>
+
+<div id="tab-overview" class="tab-content active">
+<div class="grid grid-4">
+<div class="card"><div class="label">Net Profit (FY25)</div><div class="value">RM10.51B</div><div class="change pos">+4.2% YoY</div></div>
+<div class="card"><div class="label">Net Operating Income</div><div class="value">RM30.38B</div><div class="change pos">+2.7% YoY</div></div>
+<div class="card"><div class="label">Dividend / Share</div><div class="value">63 sen</div><div class="change pos">Yield 6.0%</div></div>
+<div class="card"><div class="label">ROE</div><div class="value">11.7%</div><div class="change pos">from 11.1% (FY24)</div></div>
+<div class="card"><div class="label">Total Assets</div><div class="value">RM1.05T</div><div class="change neu">Largest in Malaysia</div></div>
+<div class="card"><div class="label">Loans &amp; Financing</div><div class="value">RM677.9B</div><div class="change pos">+2.7% YoY</div></div>
+<div class="card"><div class="label">CET1 Ratio</div><div class="value">14.9%</div><div class="change pos">Well above min. 4.5%</div></div>
+<div class="card"><div class="label">Market Cap</div><div class="value">~RM120B</div><div class="change neu">~USD 30B</div></div>
+</div>
+
+<div class="grid grid-2" style="margin-top:16px">
+<div class="card">
+<div class="section-title">Net Profit Trend (RM Billion)</div>
+<div class="card-chart"><canvas id="profitTrendChart"></canvas></div>
+</div>
+<div class="card">
+<div class="section-title">Revenue (Operating) Trend (RM Billion)</div>
+<div class="card-chart"><canvas id="revenueTrendChart"></canvas></div>
+</div>
+</div>
+</div>
+
+<div id="tab-income" class="tab-content" style="display:none">
+<div class="grid grid-2">
+<div class="card">
+<div class="section-title">Income Statement Highlights</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Metric</th><th>FY2025</th><th>FY2024</th><th>Change</th></tr></thead>
+<tbody>
+<tr><td>Operating Revenue</td><td>RM66.37B</td><td>RM68.94B</td><td class="neg">-3.7%</td></tr>
+<tr><td>Net Operating Income</td><td>RM30.38B</td><td>RM29.57B</td><td class="pos">+2.7%</td></tr>
+<tr><td>Net Fund Based Income</td><td>RM20.23B</td><td>RM19.69B</td><td class="pos">+2.7%</td></tr>
+<tr><td>Non-Interest Income (NOII)</td><td>RM10.15B</td><td>RM9.88B</td><td class="pos">+2.7%</td></tr>
+<tr><td>PPOP</td><td>RM15.54B</td><td>RM15.11B</td><td class="pos">+2.8%</td></tr>
+<tr><td>PBT</td><td>RM14.33B</td><td>RM13.70B</td><td class="pos">+4.6%</td></tr>
+<tr><td>Net Profit (Attributable)</td><td>RM10.51B</td><td>RM10.09B</td><td class="pos">+4.2%</td></tr>
+<tr><td>EPS</td><td>~87 sen</td><td>~83.5 sen</td><td class="pos">+4.2%</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="card">
+<div class="section-title">Net Profit Breakdown (RM Billion)</div>
+<div class="card-chart"><canvas id="profitBreakdownChart"></canvas></div>
+</div>
+</div>
+
+<div class="card" style="margin-top:16px">
+<div class="section-title">Five-Year Revenue Trend (USD)</div>
+<div style="height:220px"><canvas id="revenueUsdChart"></canvas></div>
+</div>
+</div>
+
+<div id="tab-balance" class="tab-content" style="display:none">
+<div class="grid grid-2">
+<div class="card">
+<div class="section-title">Balance Sheet Snapshot (FY2025)</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>RM Billion</th><th>Change YoY</th></tr></thead>
+<tbody>
+<tr><td>Total Assets</td><td>RM1,053.6B</td><td class="neg">-2.0%</td></tr>
+<tr><td>Loans &amp; Financing</td><td>RM677.9B</td><td class="pos">+2.7%</td></tr>
+<tr><td>Financial Investments</td><td>RM256.7B</td><td class="pos">+1.2%</td></tr>
+<tr><td>Total Deposits</td><td>RM739.1B</td><td class="pos">+4.7%</td></tr>
+<tr><td>CASA Balances</td><td>RM295.0B</td><td class="pos">+15.2%</td></tr>
+<tr><td>Fixed Deposits</td><td>RM358.9B</td><td class="pos">+4.1%</td></tr>
+<tr><td>Total Liabilities</td><td>RM955.0B*</td><td class="neu">~</td></tr>
+<tr><td>Shareholders' Equity</td><td>~RM98.6B*</td><td class="pos">+5.2%*</td></tr>
+</tbody>
+</table>
+<p style="color:#7a7a9a;font-size:.75rem;margin-top:8px">* Estimated from reported data</p>
+</div>
+</div>
+<div class="card">
+<div class="section-title">Assets Composition</div>
+<div class="card-chart"><canvas id="assetsChart"></canvas></div>
+</div>
+</div>
+
+<div class="grid grid-2" style="margin-top:16px">
+<div class="card">
+<div class="section-title">Capital &amp; Liquidity</div>
+<div style="height:200px"><canvas id="capitalChart"></canvas></div>
+</div>
+<div class="card">
+<div class="section-title">Loan Portfolio Quality</div>
+<div style="height:200px"><canvas id="loanQualityChart"></canvas></div>
+</div>
+</div>
+</div>
+
+<div id="tab-ratios" class="tab-content" style="display:none">
+<div class="grid grid-3">
+<div class="card">
+<div class="label">Net Interest Margin</div><div class="value">2.05%</div>
+<div class="change neu">Stable YoY</div>
+<div style="margin-top:10px;font-size:.8rem;color:#7a7a9a">Resilient despite regional rate cuts across ASEAN markets</div>
+</div>
+<div class="card">
+<div class="label">Cost-to-Income Ratio</div><div class="value">48.8%</div>
+<div class="change pos">Improved from ~48.9%</div>
+<div style="margin-top:10px;font-size:.8rem;color:#7a7a9a">Overhead costs rose 2.6% but outpaced by income growth</div>
+</div>
+<div class="card">
+<div class="label">Dividend Payout Ratio</div><div class="value">72.4%</div>
+<div class="change neu">Consistent ~72-73%</div>
+<div style="margin-top:10px;font-size:.8rem;color:#7a7a9a">63 sen dividend, 6.0% yield — among sector's highest</div>
+</div>
+</div>
+
+<div class="grid grid-2" style="margin-top:16px">
+<div class="card">
+<div class="section-title">Key Financial Ratios</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Ratio</th><th>FY2025</th><th>FY2024</th><th>Change</th></tr></thead>
+<tbody>
+<tr><td>ROE</td><td>11.7%</td><td>11.1%</td><td class="pos">+60 bps</td></tr>
+<tr><td>NIM</td><td>2.05%</td><td>2.05%</td><td class="neu">Stable</td></tr>
+<tr><td>Cost-to-Income</td><td>48.8%</td><td>~48.9%</td><td class="pos">-10 bps</td></tr>
+<tr><td>CET1 Ratio</td><td>14.9%</td><td>~14.6%</td><td class="pos">+30 bps</td></tr>
+<tr><td>Total Capital Ratio</td><td>19.3%</td><td>~18.9%</td><td class="pos">+40 bps</td></tr>
+<tr><td>LCR</td><td>141.2%</td><td>~138%</td><td class="pos">+320 bps</td></tr>
+<tr><td>Gross Impaired Loans</td><td>~1.15%</td><td>1.23%</td><td class="pos">-8 bps</td></tr>
+<tr><td>Loan Loss Coverage</td><td>~128%</td><td>126.9%</td><td class="pos">+110 bps</td></tr>
+<tr><td>Net Credit Charge Off</td><td>~24 bps</td><td>26 bps</td><td class="pos">-2 bps</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="card">
+<div class="section-title">Dividend Per Share Trend (sen)</div>
+<div style="height:220px"><canvas id="dividendChart"></canvas></div>
+</div>
+</div>
+</div>
+
+<div id="tab-segment" class="tab-content" style="display:none">
+<div class="grid grid-2">
+<div class="card">
+<div class="section-title">Loan Growth by Geography</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Market</th><th>Loans (RM B)</th><th>YoY Growth</th></tr></thead>
+<tbody>
+<tr><td><strong>Malaysia</strong></td><td>RM435.2B</td><td class="pos">+6.0%</td></tr>
+<tr><td><strong>Singapore</strong></td><td>~RM165B*</td><td class="pos">+1.5%</td></tr>
+<tr><td><strong>Indonesia</strong></td><td>~RM55B*</td><td class="neg">-0.5%</td></tr>
+<tr><td><strong>Others (incl. Intl)</strong></td><td>~RM22B*</td><td class="neu">~</td></tr>
+</tbody>
+</table>
+<p style="color:#7a7a9a;font-size:.75rem;margin-top:8px">* Estimated breakdown; Total loans: RM677.9B</p>
+</div>
+</div>
+<div class="card">
+<div class="section-title">Loans by Geography</div>
+<div class="card-chart"><canvas id="geoChart"></canvas></div>
+</div>
+</div>
+
+<div class="grid grid-2" style="margin-top:16px">
+<div class="card">
+<div class="section-title">Business Segments Contribution</div>
+<div style="height:200px"><canvas id="segmentChart"></canvas></div>
+</div>
+<div class="card">
+<div class="section-title">Key Growth Drivers</div>
+<div style="margin-top:8px">
+<div style="background:rgba(78,204,163,.08);border-radius:10px;padding:14px;margin-bottom:10px;border-left:3px solid #4ecca3">
+<div style="font-weight:600;color:#4ecca3;font-size:.85rem">Malaysia Operations</div>
+<div style="color:#b0b0c8;font-size:.82rem;margin-top:4px">Loans +6.0% YoY; Core earnings driver with strong CASA growth of 15.2%</div>
+</div>
+<div style="background:rgba(138,180,248,.08);border-radius:10px;padding:14px;margin-bottom:10px;border-left:3px solid #8ab4f8">
+<div style="font-weight:600;color:#8ab4f8;font-size:.85rem">Wealth Management &amp; Insurance</div>
+<div style="color:#b0b0c8;font-size:.82rem;margin-top:4px">Key contributor to NOII growth; fee income from wealth and investment banking up</div>
+</div>
+<div style="background:rgba(15,52,96,.4);border-radius:10px;padding:14px;margin-bottom:10px;border-left:3px solid #0f3460">
+<div style="font-weight:600;color:#8ab4f8;font-size:.85rem">Islamic Banking</div>
+<div style="color:#b0b0c8;font-size:.82rem;margin-top:4px">Largest Islamic bank in ASEAN; sustainable finance reached RM156B (vs RM80B target)</div>
+</div>
+<div style="background:rgba(233,69,96,.08);border-radius:10px;padding:14px;border-left:3px solid #e94560">
+<div style="font-weight:600;color:#e94560;font-size:.85rem">Singapore &amp; Regional</div>
+<div style="color:#b0b0c8;font-size:.82rem;margin-top:4px">Singapore loans +1.5%; Indonesia rebalancing corporate portfolio; ASEAN-wide presence</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="verdict" style="margin-top:20px">
+<h3>Analysis Summary</h3>
+<p>
+<strong style="color:#4ecca3">Strengths:</strong> 
+<span class="tag green">CET1 14.9%</span>
+<span class="tag green">ROE 11.7%</span>
+<span class="tag green">Div. Yield 6.0%</span>
+<span class="tag green">LCR 141.2%</span>
+<span class="tag green">Asset Quality Improving</span>
+<br><br>
+Maybank delivered a record net profit of RM10.51B in FY2025 (+4.2% YoY), driven by steady net fund-based income growth, disciplined cost management, and improving asset quality. ROE strengthened to 11.7% and the bank maintained its ~6% dividend yield — among the highest in the sector. Capital &amp; liquidity positions remain robust (CET1 14.9%, LCR 141.2%) well above regulatory minimums. The bank exceeded all four of its sustainability targets.
+<br><br>
+<span style="color:#e94560"><strong>Risks:</strong></span>
+<span class="tag red">NIM Pressure</span>
+<span class="tag red">Cost Inflation</span>
+<span class="tag red">Regional Rate Cuts</span>
+<span class="tag red">Indonesia Portfolio</span>
+<br>
+NIM held steady at 2.05% but faces pressure from ongoing regional rate cuts. Overhead costs rose 2.6% due to IT spending, marketing, and personnel inflation. Loan growth in Indonesia remains soft as the portfolio rebalances. Revenue (operating) declined 3.7% due to changes in revenue composition.
+</p>
+</div>
+
+<footer style="text-align:center;padding:30px 0 10px;color:#5a5a7a;font-size:.8rem">
+Data sourced from Maybank FY2025 Annual Report &amp; Financial Statements &middot; For informational purposes only
+</footer>
+
+</div>
+
+<script>
+document.querySelectorAll('.tab-btn').forEach(btn => {
+btn.addEventListener('click', function(){
+document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+this.classList.add('active');
+document.querySelectorAll('.tab-content').forEach(c=>c.style.display='none');
+document.getElementById('tab-'+this.dataset.tab).style.display='block';
+});
+});
+
+const chartDefaults = {
+color:'#7a7a9a', borderColor:'rgba(255,255,255,.08)',
+plugins:{legend:{labels:{color:'#a0a0b8',font:{size:11}}}},
+scales:{x:{ticks:{color:'#7a7a9a',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},
+y:{ticks:{color:'#7a7a9a',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}}}
+};
+
+new Chart(document.getElementById('profitTrendChart'),{type:'bar',data:{
+labels:['2021','2022','2023','2024','2025'],
+datasets:[{
+label:'Net Profit (RM B)',
+data:[8.10,7.96,9.35,10.09,10.51],
+backgroundColor:['rgba(78,204,163,.5)','rgba(78,204,163,.5)','rgba(78,204,163,.6)','rgba(78,204,163,.8)','rgba(78,204,163,1)'],
+borderColor:'#4ecca3',borderWidth:1,borderRadius:4
+}]
+},options:{
+...chartDefaults,
+plugins:{...chartDefaults.plugins,legend:{display:false}},
+scales:{...chartDefaults.scales,y:{...chartDefaults.scales.y,beginAtZero:true}}
+}});
+
+new Chart(document.getElementById('revenueTrendChart'),{type:'line',data:{
+labels:['2021','2022','2023','2024','2025'],
+datasets:[{
+label:'Operating Revenue (RM B)',
+data:[45.96,49.42,63.52,68.94,66.37],
+borderColor:'#8ab4f8',backgroundColor:'rgba(138,180,248,.1)',
+fill:true,tension:.3,pointBackgroundColor:'#8ab4f8',pointRadius:4
+}]
+},options:{...chartDefaults,plugins:{...chartDefaults.plugins,legend:{display:false}}}});
+
+new Chart(document.getElementById('profitBreakdownChart'),{type:'doughnut',data:{
+labels:['Net Fund Based Income','Non-Interest Income','Other Income'],
+datasets:[{
+data:[20.23,10.15,0],
+backgroundColor:['#4ecca3','#8ab4f8','#e94560'],
+borderColor:'#1a1a2e',borderWidth:2
+}]
+},options:{...chartDefaults,cutout:'65%',
+plugins:{...chartDefaults.plugins,legend:{position:'bottom',labels:{...chartDefaults.plugins.legend.labels,font:{size:10}}}}}});
+
+new Chart(document.getElementById('revenueUsdChart'),{type:'bar',data:{
+labels:['2021','2022','2023','2024','2025'],
+datasets:[{
+label:'Revenue (USD B)',
+data:[5.72,5.61,5.67,6.24,6.58],
+backgroundColor:['rgba(138,180,248,.5)','rgba(138,180,248,.5)','rgba(138,180,248,.6)','rgba(138,180,248,.8)','rgba(138,180,248,1)'],
+borderRadius:4
+}]
+},options:{...chartDefaults,plugins:{...chartDefaults.plugins,legend:{display:false}}}});
+
+new Chart(document.getElementById('assetsChart'),{type:'doughnut',data:{
+labels:['Loans & Financing','Financial Investments','Cash & Others','Other Assets'],
+datasets:[{
+data:[677.9,256.7,70,49],
+backgroundColor:['#4ecca3','#8ab4f8','#ffd166','#e94560'],
+borderColor:'#1a1a2e',borderWidth:2
+}]
+},options:{...chartDefaults,cutout:'60%',
+plugins:{...chartDefaults.plugins,legend:{position:'right',labels:{...chartDefaults.plugins.legend.labels,font:{size:10}}}}}});
+
+new Chart(document.getElementById('capitalChart'),{type:'bar',data:{
+labels:['CET1','Tier 1','Total Capital','LCR'],
+datasets:[
+{label:'FY2024',data:[14.6,15.8,18.9,138],backgroundColor:'rgba(138,180,248,.4)',borderRadius:4},
+{label:'FY2025',data:[14.9,16.2,19.3,141.2],backgroundColor:'rgba(78,204,163,.7)',borderRadius:4}
+]
+},options:{...chartDefaults,plugins:{...chartDefaults.plugins,legend:{position:'top',labels:{...chartDefaults.plugins.legend.labels,font:{size:10}}}},
+scales:{...chartDefaults.scales,y:{...chartDefaults.scales.y,beginAtZero:true}}}});
+
+new Chart(document.getElementById('loanQualityChart'),{type:'line',data:{
+labels:['2022','2023','2024','2025'],
+datasets:[
+{label:'Gross Impaired Loans (%)',data:[1.45,1.34,1.23,1.15],borderColor:'#e94560',backgroundColor:'rgba(233,69,96,.1)',fill:true,tension:.3,pointRadius:4},
+{label:'Loan Loss Coverage (%)',data:[122,124.9,126.9,128],borderColor:'#4ecca3',backgroundColor:'rgba(78,204,163,.1)',fill:true,tension:.3,pointRadius:4,yAxisID:'y1'}
+]
+},options:{...chartDefaults,
+scales:{...chartDefaults.scales,
+y:{type:'linear',position:'left',min:0,max:2,ticks:{color:'#e94560',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},
+y1:{type:'linear',position:'right',min:110,max:135,ticks:{color:'#4ecca3',font:{size:10}},grid:{display:false}}
+},
+plugins:{...chartDefaults.plugins,legend:{position:'top',labels:{...chartDefaults.plugins.legend.labels,font:{size:10}}}}}});
+
+new Chart(document.getElementById('dividendChart'),{type:'bar',data:{
+labels:['2022','2023','2024','2025'],
+datasets:[{
+label:'Dividend (sen/share)',
+data:[55,58,61,63],
+backgroundColor:['rgba(78,204,163,.5)','rgba(78,204,163,.6)','rgba(78,204,163,.8)','rgba(78,204,163,1)'],
+borderRadius:4
+}]
+},options:{...chartDefaults,plugins:{...chartDefaults.plugins,legend:{display:false}}}});
+
+new Chart(document.getElementById('geoChart'),{type:'doughnut',data:{
+labels:['Malaysia','Singapore','Indonesia','Others'],
+datasets:[{
+data:[64.2,24.3,8.1,3.4],
+backgroundColor:['#4ecca3','#8ab4f8','#ffd166','#e94560'],
+borderColor:'#1a1a2e',borderWidth:2
+}]
+},options:{...chartDefaults,cutout:'60%',
+plugins:{...chartDefaults.plugins,legend:{position:'right',labels:{...chartDefaults.plugins.legend.labels,font:{size:10}}}}}});
+
+new Chart(document.getElementById('segmentChart'),{type:'polarArea',data:{
+labels:['Retail/Consumer','Corporate/Wholesale','Islamic Banking','Wealth & Insurance','Global Markets'],
+datasets:[{
+data:[32,28,18,14,8],
+backgroundColor:['rgba(78,204,163,.7)','rgba(138,180,248,.7)','rgba(255,209,102,.7)','rgba(233,69,96,.7)','rgba(160,160,184,.7)'],
+borderColor:'#1a1a2e',borderWidth:1
+}]
+},options:{...chartDefaults,plugins:{...chartDefaults.plugins,legend:{position:'right',labels:{...chartDefaults.plugins.legend.labels,font:{size:10}}}}}});
+</script>
+
+</body>
+</html>
