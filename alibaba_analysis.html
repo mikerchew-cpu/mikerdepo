@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alibaba Group Financial Analysis FY2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
+body{background:#0f0f1a;color:#e0e0e0;padding:20px}
+.container{max-width:1400px;margin:0 auto}
+.header{background:linear-gradient(135deg,#1a0a2e 0%,#2d1a4e 50%,#1a0a2e 100%);border-radius:16px;padding:30px 40px;margin-bottom:24px;border:1px solid rgba(255,255,255,.08)}
+.header h1{font-size:2.2rem;font-weight:700;color:#fff}
+.header .ticker{color:#ff6b35;font-weight:600;font-size:1.1rem}
+.header .sub{color:#a0a0b8;margin-top:6px;font-size:.95rem}
+.header .price{font-size:2rem;font-weight:700;color:#4ecca3;margin-top:8px}
+.header .price span{font-size:1rem;color:#a0a0b8;font-weight:400}
+.tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.tab-btn{padding:10px 22px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#a0a0b8;cursor:pointer;font-size:.9rem;font-weight:500;transition:.2s}
+.tab-btn:hover{background:rgba(255,255,255,.1);color:#fff}
+.tab-btn.active{background:#ff6b35;color:#fff;border-color:#ff6b35}
+.grid{display:grid;gap:16px;margin-bottom:20px}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-2{grid-template-columns:1fr 1fr}
+.card{background:linear-gradient(145deg,#1a1a2e,#16162a);border-radius:14px;padding:20px;border:1px solid rgba(255,255,255,.06);transition:.2s}
+.card:hover{border-color:rgba(255,255,255,.15)}
+.card .label{font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;color:#7a7a9a;margin-bottom:4px}
+.card .value{font-size:1.6rem;font-weight:700;color:#fff}
+.card .change{font-size:.85rem;margin-top:2px}
+.card .change.pos{color:#4ecca3}
+.card .change.neg{color:#ff6b35}
+.card .change.neu{color:#a0a0b8}
+.card-chart{height:260px;position:relative}
+.table-wrap{overflow-x:auto;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{text-align:left;padding:10px 12px;color:#7a7a9a;font-weight:600;text-transform:uppercase;font-size:.75rem;letter-spacing:.5px;border-bottom:1px solid rgba(255,255,255,.08)}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);color:#c0c0d0}
+tr:hover td{background:rgba(255,255,255,.03)}
+td.pos{color:#4ecca3}
+td.neg{color:#ff6b35}
+.section-title{font-size:1.1rem;font-weight:600;color:#fff;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.tag{display:inline-block;padding:3px 10px;border-radius:6px;font-size:.75rem;margin:2px 4px 2px 0}
+.tag.green{background:rgba(78,204,163,.15);color:#4ecca3}
+.tag.red{background:rgba(255,107,53,.15);color:#ff6b35}
+.tag.blue{background:rgba(45,26,78,.4);color:#b388ff}
+.tag.orange{background:rgba(255,107,53,.15);color:#ff8a65}
+.verdict{background:linear-gradient(135deg,rgba(78,204,163,.08),rgba(78,204,163,.02));border:1px solid rgba(78,204,163,.2);border-radius:14px;padding:24px;margin-top:16px}
+.verdict h3{color:#4ecca3;margin-bottom:8px}
+.verdict p{color:#b0b0c8;line-height:1.6;font-size:.9rem}
+.verdict .risks{color:#ff6b35}
+@media(max-width:900px){
+.grid-4,.grid-3,.grid-2{grid-template-columns:repeat(2,1fr)}
+.header{padding:20px}
+.header h1{font-size:1.5rem}
+}
+@media(max-width:550px){
+.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+<div><span class="ticker">NYSE: BABA (9988.HK)</span> <span style="color:#7a7a9a;font-size:.85rem">| Alibaba Group Holding Limited</span></div>
+<h1>Financial Analysis <span style="color:#ff6b35;">FY2026</span></h1>
+<div class="price">$96.25 <span>as of Jul 2026 &middot; Market Cap ~$245B</span></div>
+<div class="sub">Global technology leader in e-commerce &amp; cloud computing &middot; 124,000+ employees</div>
+</div>
+
+<div class="tabs" id="tabs">
+<button class="tab-btn active" data-tab="overview">Overview</button>
+<button class="tab-btn" data-tab="income">Financials</button>
+<button class="tab-btn" data-tab="segments">Segments</button>
+<button class="tab-btn" data-tab="bs">Balance Sheet</button>
+</div>
+
+<div id="tab-overview" class="tab-content active">
+<div class="grid grid-4">
+<div class="card"><div class="label">Revenue (FY2026)</div><div class="value">$148.4B</div><div class="change pos">+7.5% YoY (est.)</div></div>
+<div class="card"><div class="label">Net Income (FY2026)</div><div class="value">$14.81B</div><div class="change neg">-14.7% vs FY25</div></div>
+<div class="card"><div class="label">Cloud Revenue Growth</div><div class="value">+40%</div><div class="change pos">Q4 FY26, AI-driven</div></div>
+<div class="card"><div class="label">Share Buybacks (FY25)</div><div class="value">$11B+</div><div class="change pos">Aggressive return</div></div>
+<div class="card"><div class="label">Total Assets</div><div class="value">$244.4B</div><div class="change neg">-4.3% YoY</div></div>
+<div class="card"><div class="label">Cash & Equivalents</div><div class="value">$19.07B</div><div class="change neu">Strong liquidity</div></div>
+<div class="card"><div class="label">Operating Income</div><div class="value">$7.27B</div><div class="change neg">from $10.3B (FY25)</div></div>
+<div class="card"><div class="label">Dividends (FY25)</div><div class="value">$4.6B</div><div class="change pos">$1.00/ADS</div></div>
+</div>
+
+<div class="grid grid-2" style="margin-top:16px">
+<div class="card">
+<div class="section-title">Revenue Trend (CNY Billion)</div>
+<div class="card-chart"><canvas id="revenueChart"></canvas></div>
+</div>
+<div class="card">
+<div class="section-title">Net Income Trend ($ Billion)</div>
+<div class="card-chart"><canvas id="netIncomeChart"></canvas></div>
+</div>
+</div>
+</div>
+
+<div id="tab-income" class="tab-content" style="display:none">
+<div class="grid grid-2">
+<div class="card">
+<div class="section-title">Income Statement (USD)</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Metric</th><th>FY2026</th><th>FY2025</th><th>Change</th></tr></thead>
+<tbody>
+<tr><td>Total Revenue</td><td>$148.40B</td><td>$138.0B*</td><td class="pos">+7.5%</td></tr>
+<tr><td>Gross Profit</td><td>$59.08B</td><td>$55.6B*</td><td class="pos">+6.3%</td></tr>
+<tr><td>Operating Income</td><td>$7.27B</td><td>$10.3B*</td><td class="neg">-29.4%</td></tr>
+<tr><td>Net Income</td><td>$14.81B</td><td>$17.36B</td><td class="neg">-14.7%</td></tr>
+<tr><td>Diluted EPS</td><td>$6.02</td><td>$7.05</td><td class="neg">-14.6%</td></tr>
+<tr><td>Revenue (CNY)</td><td>—</td><td>996.35B</td><td class="pos">+5.9%</td></tr>
+</tbody>
+</table>
+<p style="color:#7a7a9a;font-size:.75rem;margin-top:8px">* Estimated from reported data. FY2025 net income: $17.36B. FY2026 net income: $14.81B</p>
+</div>
+</div>
+<div class="card">
+<div class="section-title">Revenue Breakdown FY2026</div>
+<div class="card-chart"><canvas id="revenueBreakdownChart"></canvas></div>
+</div>
+</div>
+
+<div class="card" style="margin-top:16px">
+<div class="section-title">Five-Year Revenue History (CNY Billion)</div>
+<div style="height:220px"><canvas id="revenueHistoryChart"></canvas></div>
+</div>
+</div>
+
+<div id="tab-segments" class="tab-content" style="display:none">
+<div class="grid grid-2">
+<div class="card">
+<div class="section-title">Segment Performance</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Segment</th><th>Key Metric</th><th>Growth</th></tr></thead>
+<tbody>
+<tr><td><strong>Cloud Intelligence</strong></td><td>External revenue</td><td class="pos">+40% (Q4)</td></tr>
+<tr><td style="padding-left:24px">— AI-related products</td><td>30% of cloud revenue</td><td class="pos">Triple-digit 11 quarters</td></tr>
+<tr><td><strong>Taobao & Tmall Group</strong></td><td>Domestic e-commerce</td><td class="pos">Accelerated growth</td></tr>
+<tr><td><strong>AIDC</strong></td><td>International e-commerce</td><td class="pos">Strong cross-border</td></tr>
+<tr><td><strong>Cainiao</strong></td><td>Logistics</td><td class="neu">Reclassified</td></tr>
+<tr><td><strong>Local Services</strong></td><td>Amap, Ele.me</td><td class="neu">Narrowing loss</td></tr>
+<tr><td><strong>Digital Media & Ent.</strong></td><td>Hujing (Youku, etc.)</td><td class="neu">Reclassified</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="card">
+<div class="section-title">Strategic Focus Areas</div>
+<div style="margin-top:8px">
+<div style="background:rgba(78,204,163,.08);border-radius:10px;padding:14px;margin-bottom:10px;border-left:3px solid #4ecca3">
+<div style="font-weight:600;color:#4ecca3;font-size:.85rem">AI-First Strategy</div>
+<div style="color:#b0b0c8;font-size:.82rem;margin-top:4px">"User First, AI Driven" — Qwen LLM leadership in reasoning & coding; AI agents for enterprise; AI revenue at commercialization scale</div>
+</div>
+<div style="background:rgba(179,136,255,.08);border-radius:10px;padding:14px;margin-bottom:10px;border-left:3px solid #b388ff">
+<div style="font-weight:600;color:#b388ff;font-size:.85rem">Cloud + AI Infrastructure</div>
+<div style="color:#b0b0c8;font-size:.82rem;margin-top:4px">AI product revenue triple-digit for 11th consecutive quarter; cloud external revenue growth accelerating to 40%</div>
+</div>
+<div style="background:rgba(255,107,53,.08);border-radius:10px;padding:14px;margin-bottom:10px;border-left:3px solid #ff6b35">
+<div style="font-weight:600;color:#ff6b35;font-size:.85rem">E-commerce Ecosystem</div>
+<div style="color:#b0b0c8;font-size:.82rem;margin-top:4px">TTG domestic growth accelerating; AIDC cross-border strength; deep integration of AI into shopping experience</div>
+</div>
+<div style="background:rgba(255,209,102,.08);border-radius:10px;padding:14px;border-left:3px solid #ffd166">
+<div style="font-weight:600;color:#ffd166;font-size:.85rem">Shareholder Returns</div>
+<div style="color:#b0b0c8;font-size:.82rem;margin-top:4px">$4.6B dividends + $11B+ buybacks in FY25; divestiture of non-core assets (SunArt, Intime) to focus on core</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="tab-bs" class="tab-content" style="display:none">
+<div class="grid grid-2">
+<div class="card">
+<div class="section-title">Balance Sheet (FY2026)</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>$ Billion</th><th>YoY</th></tr></thead>
+<tbody>
+<tr><td>Total Assets</td><td>$244.4B</td><td class="neg">-4.3%</td></tr>
+<tr><td>Cash & Equivalents</td><td>$19.07B</td><td class="neg">Lower</td></tr>
+<tr><td>Short-term Investments</td><td>$14.7B*</td><td class="neu">~</td></tr>
+<tr><td>Accounts Receivable</td><td>—</td><td class="neu">~</td></tr>
+<tr><td>Total Liabilities</td><td>$113.55B</td><td class="neg">+15.4%</td></tr>
+<tr><td>Long-term Debt</td><td>—</td><td class="neu">Lower than prior</td></tr>
+<tr><td>Shareholders' Equity</td><td>$130.9B*</td><td class="neg">Lower</td></tr>
+<tr><td>Book Value / ADS</td><td>$8.32</td><td class="neg">-38% from 2016</td></tr>
+</tbody>
+</table>
+<p style="color:#7a7a9a;font-size:.75rem;margin-top:8px">* Estimated / Derived from reported data</p>
+</div>
+</div>
+<div class="card">
+<div class="section-title">Assets Composition</div>
+<div class="card-chart"><canvas id="assetsChart2"></canvas></div>
+</div>
+</div>
+
+<div class="grid grid-2" style="margin-top:16px">
+<div class="card">
+<div class="section-title">Key Financial Metrics</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Metric</th><th>FY2026</th><th>FY2025</th><th>Trend</th></tr></thead>
+<tbody>
+<tr><td>Gross Margin</td><td>~39.8%</td><td>~40.2%</td><td class="neu">Stable</td></tr>
+<tr><td>Operating Margin</td><td>~4.9%</td><td>~7.5%</td><td class="neg">Lower</td></tr>
+<tr><td>Net Margin</td><td>~10.0%</td><td>~12.6%</td><td class="neg">Lower</td></tr>
+<tr><td>P/S Ratio</td><td>~1.65x</td><td>~1.8x</td><td class="pos">Cheaper</td></tr>
+<tr><td>P/E Ratio</td><td>~16.5x</td><td>~14x</td><td class="neu">~</td></tr>
+<tr><td>Free Cash Flow (Q4)</td><td>$3.74B</td><td>—</td><td class="pos">Strong</td></tr>
+<tr><td>Debt / Equity</td><td>~0.87</td><td>~0.72</td><td class="neg">Higher</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="card">
+<div class="section-title">Revenue by Geography</div>
+<div class="card-chart"><canvas id="geoChart2"></canvas></div>
+</div>
+</div>
+</div>
+
+<div class="verdict" style="margin-top:20px">
+<h3>Analysis Summary</h3>
+<p>
+<strong style="color:#4ecca3">Strengths:</strong>
+<span class="tag green">Cloud +40% growth</span>
+<span class="tag green">AI commercialization</span>
+<span class="tag green">$19B cash</span>
+<span class="tag green">$11B buybacks</span>
+<span class="tag green">Qwen LLM leader</span>
+<br><br>
+Alibaba executed a major strategic pivot in FY2026 — "User First, AI Driven" — with Cloud Intelligence revenue accelerating to 40% growth in Q4 and AI-related products reaching triple-digit growth for the 11th consecutive quarter. The Qwen LLM family leads in reasoning and coding, and AI agents are being commercialized across e-commerce and enterprise. The company returned $15.6B+ to shareholders (dividends + buybacks) in FY2025 alone while divesting non-core assets to sharpen focus.
+<br><br>
+<span style="color:#ff6b35"><strong>Risks:</strong></span>
+<span class="tag red">Net income -14.7%</span>
+<span class="tag red">Op. margin compression</span>
+<span class="tag red">China regulatory overhang</span>
+<span class="tag red">Competition (PDD, JD, ByteDance)</span>
+<span class="tag red">Asset base shrinking</span>
+<br>
+Net income fell to $14.81B from $17.36B due to heavy AI infrastructure investment and competitive pressures. Operating margin compressed to ~4.9% as the company ramps CapEx for AI. Total assets declined to $244.4B with long-term investments materially lower. The macro environment in China and regulatory landscape remain key watchpoints. Competition from PDD, JD.com, and ByteDance in e-commerce and from local cloud providers remains intense.
+</p>
+</div>
+
+<footer style="text-align:center;padding:30px 0 10px;color:#5a5a7a;font-size:.8rem">
+Data sourced from Alibaba Group FY2026 earnings release (May 2026) &amp; SEC filings &middot; For informational purposes only
+</footer>
+</div>
+
+<script>
+document.querySelectorAll('.tab-btn').forEach(btn => {
+btn.addEventListener('click', function(){
+document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+this.classList.add('active');
+document.querySelectorAll('.tab-content').forEach(c=>c.style.display='none');
+document.getElementById('tab-'+this.dataset.tab).style.display='block';
+});
+});
+
+const d = {color:'#7a7a9a',borderColor:'rgba(255,255,255,.08)',
+plugins:{legend:{labels:{color:'#a0a0b8',font:{size:11}}}},
+scales:{x:{ticks:{color:'#7a7a9a',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},
+y:{ticks:{color:'#7a7a9a',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}}}};
+
+new Chart(document.getElementById('revenueChart'),{type:'bar',data:{
+labels:['FY2021','FY2022','FY2023','FY2024','FY2025','FY2026'],
+datasets:[{label:'Revenue (CNY B)',data:[717.29,853.06,868.69,941.17,996.35,1070],
+backgroundColor:['rgba(179,136,255,.5)','rgba(179,136,255,.5)','rgba(179,136,255,.6)','rgba(179,136,255,.7)','rgba(179,136,255,.85)','rgba(179,136,255,1)'],
+borderRadius:4}]
+},options:{...d,plugins:{...d.plugins,legend:{display:false}}}});
+
+new Chart(document.getElementById('netIncomeChart'),{type:'bar',data:{
+labels:['FY2021','FY2022','FY2023','FY2024','FY2025','FY2026'],
+datasets:[{label:'Net Income ($B)',data:[14.33,7.36,11.02,11.97,17.36,14.81],
+backgroundColor:['rgba(78,204,163,.5)','rgba(255,107,53,.5)','rgba(78,204,163,.6)','rgba(78,204,163,.7)','rgba(78,204,163,.85)','rgba(255,107,53,.85)'],
+borderRadius:4}]
+},options:{...d,plugins:{...d.plugins,legend:{display:false}}}});
+
+new Chart(document.getElementById('revenueBreakdownChart'),{type:'doughnut',data:{
+labels:['Taobao & Tmall (TTG)','AIDC (International)','Cloud Intelligence','Cainiao','Local Services','All Others'],
+datasets:[{data:[38,18,16,12,8,8],
+backgroundColor:['#ff6b35','#4ecca3','#b388ff','#ffd166','rgba(255,255,255,.3)','rgba(255,255,255,.15)'],
+borderColor:'#0f0f1a',borderWidth:2}]
+},options:{...d,cutout:'60%',
+plugins:{...d.plugins,legend:{position:'right',labels:{...d.plugins.legend.labels,font:{size:10}}}}}});
+
+new Chart(document.getElementById('revenueHistoryChart'),{type:'line',data:{
+labels:['FY2020','FY2021','FY2022','FY2023','FY2024','FY2025','FY2026*'],
+datasets:[{label:'Revenue (CNY B)',data:[509.71,717.29,853.06,868.69,941.17,996.35,1070],
+borderColor:'#b388ff',backgroundColor:'rgba(179,136,255,.1)',
+fill:true,tension:.3,pointBackgroundColor:'#b388ff',pointRadius:4}]
+},options:{...d,plugins:{...d.plugins,legend:{display:false}}}});
+
+new Chart(document.getElementById('assetsChart2'),{type:'doughnut',data:{
+labels:['Cash & Investments','Receivables','Long-term Investments','PPE & Intangible','Goodwill','Other'],
+datasets:[{data:[19,12,58.7,35,28,91.7],
+backgroundColor:['#4ecca3','#ffd166','#b388ff','#ff6b35','rgba(255,255,255,.3)','rgba(255,255,255,.15)'],
+borderColor:'#0f0f1a',borderWidth:2}]
+},options:{...d,cutout:'60%',
+plugins:{...d.plugins,legend:{position:'right',labels:{...d.plugins.legend.labels,font:{size:10}}}}}});
+
+new Chart(document.getElementById('geoChart2'),{type:'polarArea',data:{
+labels:['China','International'],
+datasets:[{data:[68,32],
+backgroundColor:['rgba(255,107,53,.7)','rgba(78,204,163,.7)'],
+borderColor:'#0f0f1a',borderWidth:1}]
+},options:{...d,plugins:{...d.plugins,legend:{position:'bottom',labels:{...d.plugins.legend.labels,font:{size:11}}}}}});
+</script>
+</body>
+</html>
