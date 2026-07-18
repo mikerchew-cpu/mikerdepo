@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lygend Resources (2245.HK) — HK Stock Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
+body{background:#07070f;color:#e0e0e0;padding:16px}
+.container{max-width:1500px;margin:0 auto}
+
+.header{background:linear-gradient(135deg,#0a0a1a,#1a1a2e 50%,#0d1b2a 100%);border-radius:16px;padding:24px 32px;margin-bottom:20px;border:1px solid rgba(255,255,255,.06)}
+.header h1{font-size:1.6rem;font-weight:700;color:#fff}
+.header .sub{color:#6a6a8a;font-size:.82rem;margin-top:4px}
+.header .ticker{font-size:1.8rem;font-weight:700;color:#fff}
+.header .ticker .exch{font-size:.75rem;font-weight:400;color:#5a5a7a}
+.header .name{color:#7a7a9a;font-size:.85rem;margin:2px 0 8px}
+.header .price{font-size:2rem;font-weight:700;color:#4ecca3}
+.header .price-row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.header .meta{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap;font-size:.78rem;color:#6a6a8a}
+.header .meta b{color:#c0c0d0;font-weight:600}
+.header .change{padding:2px 10px;border-radius:6px;font-size:.9rem;font-weight:600}
+.header .change.up{background:rgba(78,204,163,.12);color:#4ecca3}
+.header .change.down{background:rgba(239,83,80,.12);color:#ef5350}
+
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.stat-box{background:rgba(255,255,255,.02);border-radius:10px;padding:14px 16px;border:1px solid rgba(255,255,255,.04)}
+.stat-box .lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.3px;color:#5a5a7a;margin-bottom:2px}
+.stat-box .val{font-size:1.1rem;font-weight:700;color:#fff}
+.stat-box .sub{font-size:.7rem;color:#6a6a8a;margin-top:1px}
+.stat-box .val.gold{color:#ffd166}
+.stat-box .val.blue{color:#4fc3f7}
+.stat-box .val.green{color:#4ecca3}
+.stat-box .val.red{color:#ef5350}
+.stat-box .val.orange{color:#ffa726}
+
+.tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.tab-btn{padding:9px 18px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#7a7a9a;cursor:pointer;font-size:.82rem;font-weight:500;transition:.2s}
+.tab-btn:hover{background:rgba(255,255,255,.06);color:#e0e0e0}
+.tab-btn.active{background:#4fc3f7;color:#07070f;border-color:#4fc3f7;font-weight:700}
+
+.grid{display:grid;gap:14px;margin-bottom:16px}
+.grid-2{grid-template-columns:1fr 1fr}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+
+.card{background:linear-gradient(145deg,#101028,#0c0c20);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,.05)}
+.card .title{font-size:.85rem;font-weight:600;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.card .title .icon{font-size:1rem}
+.chart-wrap{height:230px;position:relative}
+.table-wrap{overflow-x:auto;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:.78rem}
+th{text-align:left;padding:7px 8px;color:#5a5a7a;font-weight:600;font-size:.65rem;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid rgba(255,255,255,.05)}
+td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.02);color:#b0b0c8}
+tr:hover td{background:rgba(255,255,255,.015)}
+td.up{color:#4ecca3}
+td.down{color:#ef5350}
+td.center{text-align:center}
+.tag{display:inline-block;padding:1px 8px;border-radius:4px;font-size:.65rem;font-weight:600;margin:1px 3px 1px 0}
+.tag.green{background:rgba(78,204,163,.12);color:#4ecca3}
+.tag.red{background:rgba(239,83,80,.12);color:#ef5350}
+.tag.blue{background:rgba(79,195,247,.12);color:#4fc3f7}
+.tag.gold{background:rgba(255,209,102,.12);color:#ffd166}
+.tag.orange{background:rgba(255,167,38,.12);color:#ffa726}
+
+.alert{background:rgba(79,195,247,.04);border:1px solid rgba(79,195,247,.1);border-radius:10px;padding:14px 18px;font-size:.78rem;color:#b0b0c8;line-height:1.5;margin-bottom:14px}
+.alert strong{color:#4fc3f7}
+
+.verdict{background:linear-gradient(135deg,rgba(78,204,163,.04),rgba(78,204,163,.01));border:1px solid rgba(78,204,163,.12);border-radius:12px;padding:20px;margin-top:14px}
+.verdict h3{color:#4ecca3;font-size:.95rem;margin-bottom:6px}
+.verdict p{color:#a0a0b8;font-size:.8rem;line-height:1.6}
+
+footer{text-align:center;padding:24px 0 8px;color:#3a3a5a;font-size:.7rem}
+
+@media(max-width:1000px){
+.stats-grid{grid-template-columns:repeat(2,1fr)}
+.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+<div class="ticker">2245.HK <span class="exch">HKEX</span></div>
+<div class="name">Lygend Resources &amp; Technology Co., Ltd. <span style="color:#5a5a7a;font-size:.7rem">宁波力勤资源科技</span></div>
+<h1>Nickel Full-Chain Stock Dashboard</h1>
+<div class="price-row">
+<span class="price">HK$13.78</span>
+<span class="change down">-4.95%</span>
+<span style="font-size:.8rem;color:#6a6a8a">Mkt Cap: HK$21.4B</span>
+</div>
+<div class="meta">
+<span><b>P/E:</b> ~5.2x</span>
+<span><b>P/B:</b> 1.16x</span>
+<span><b>Div Yield:</b> 5.3%</span>
+<span><b>52W Range:</b> 8.51 – 30.82</span>
+<span><b>EV/EBITDA:</b> 3.28x</span>
+</div>
+</div>
+
+<div class="stats-grid">
+<div class="stat-box"><div class="lbl">Revenue FY2025</div><div class="val green">RMB 40.24B</div><div class="sub">+37.7% YoY</div></div>
+<div class="stat-box"><div class="lbl">Net Profit (Attr.)</div><div class="val green">RMB 2.857B</div><div class="sub">+61.1% YoY</div></div>
+<div class="stat-box"><div class="lbl">Gross Margin</div><div class="val blue">19.2%</div><div class="sub">+90 bps YoY</div></div>
+<div class="stat-box"><div class="lbl">Operating Margin</div><div class="val blue">14.7%</div><div class="sub">Strong</div></div>
+<div class="stat-box"><div class="lbl">EPS</div><div class="val green">RMB 1.84</div><div class="sub">+70.4% YoY</div></div>
+<div class="stat-box"><div class="lbl">Dividend</div><div class="val gold">RMB 0.60</div><div class="sub">Yield 5.3%</div></div>
+<div class="stat-box"><div class="lbl">EBITDA</div><div class="val green">RMB 7.59B</div><div class="sub">EV/EBITDA 3.28x</div></div>
+<div class="stat-box"><div class="lbl">Op. Cash Flow</div><div class="val blue">RMB 6.46B</div><div class="sub">Strong FCF generation</div></div>
+</div>
+
+<div class="tabs">
+<button class="tab-btn active" data-tab="overview">Overview</button>
+<button class="tab-btn" data-tab="financials">Financials</button>
+<button class="tab-btn" data-tab="operations">Operations</button>
+<button class="tab-btn" data-tab="outlook">Outlook</button>
+</div>
+
+<!-- TAB: OVERVIEW -->
+<div id="tab-overview" class="tab-content active">
+<div class="grid grid-2">
+<div class="card">
+<div class="title"><span class="icon">📈</span> Revenue Trend (RMB B)</div>
+<div class="chart-wrap"><canvas id="revChart"></canvas></div>
+</div>
+<div class="card">
+<div class="title"><span class="icon">💰</span> Net Profit Trend (RMB B)</div>
+<div class="chart-wrap"><canvas id="profitChart"></canvas></div>
+</div>
+</div>
+
+<div class="grid grid-3" style="margin-top:4px">
+<div class="card">
+<div class="title">EBITDA & Margin</div>
+<div class="chart-wrap" style="height:180px"><canvas id="ebitdaChart"></canvas></div>
+</div>
+<div class="card">
+<div class="title">FY2025 Revenue Mix</div>
+<div class="chart-wrap" style="height:180px"><canvas id="mixChart"></canvas></div>
+</div>
+<div class="card">
+<div class="title">Key Financial KPIs</div>
+<div style="padding:4px 0">
+<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.72rem">ROE</span><span style="color:#4ecca3;font-size:.78rem;font-weight:600">24.6%</span></div>
+<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.72rem">ROA</span><span style="color:#4ecca3;font-size:.78rem;font-weight:600">8.9%</span></div>
+<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.72rem">Debt/Equity</span><span style="color:#ffa726;font-size:.78rem;font-weight:600">89.0%</span></div>
+<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.72rem">Current Ratio</span><span style="color:#fff;font-size:.78rem;font-weight:600">1.14</span></div>
+<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.72rem">Payout Ratio</span><span style="color:#4ecca3;font-size:.78rem;font-weight:600">~19%</span></div>
+<div style="display:flex;justify-content:space-between;padding:5px 0;">
+<span style="color:#7a7a9a;font-size:.72rem">Profit Margin</span><span style="color:#4ecca3;font-size:.78rem;font-weight:600">7.1%</span></div>
+</div>
+</div>
+</div>
+
+<div class="alert">
+<strong>FY2025 Record Results:</strong> Revenue RMB 40.24B (+37.7%), net profit attributable RMB 2.857B (+61.1%), total net profit RMB 4.75B (+47.9%). ONC wet-process HPAL project fully ramped, KPS pyrometallurgy project progressively commissioning. Dividend RMB 0.60 (vs RMB 0.35). A-share IPO on Shenzhen Stock Exchange in progress.
+</div>
+</div>
+
+<!-- TAB: FINANCIALS -->
+<div id="tab-financials" class="tab-content" style="display:none">
+<div class="grid grid-2">
+<div class="card">
+<div class="title"><span class="icon">📊</span> Income Statement (RMB M)</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Metric</th><th>FY2025</th><th>FY2024</th><th>Change</th></tr></thead>
+<tbody>
+<tr><td>Revenue</td><td>40,240</td><td>29,233</td><td class="up">+37.7%</td></tr>
+<tr><td>Gross Profit</td><td>7,715</td><td>5,353</td><td class="up">+44.1%</td></tr>
+<tr><td>Gross Margin</td><td>19.2%</td><td>18.3%</td><td class="up">+90 bps</td></tr>
+<tr><td>Operating Income</td><td>~5,930</td><td>~3,900</td><td class="up">+52%</td></tr>
+<tr><td>Operating Margin</td><td>14.7%</td><td>~13.3%</td><td class="up">+140 bps</td></tr>
+<tr><td>Net Profit (Total)</td><td>4,746</td><td>3,209</td><td class="up">+47.9%</td></tr>
+<tr><td>Net Profit (Attr.)</td><td>2,857</td><td>1,773</td><td class="up">+61.1%</td></tr>
+<tr><td>EPS (RMB)</td><td>1.84</td><td>1.08</td><td class="up">+70.4%</td></tr>
+<tr><td>EBITDA</td><td>7,590</td><td>~5,200</td><td class="up">+46%</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="card">
+<div class="title"><span class="icon">🏛️</span> Balance Sheet & Ratios</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>RMB Billion</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Total Cash</td><td>RMB 7.37B</td><td class="up">Liquid</td></tr>
+<tr><td>Total Debt</td><td>RMB 18.61B</td><td class="down">High leverage</td></tr>
+<tr><td>Net Debt</td><td>RMB 11.24B</td><td class="orange">Monitor</td></tr>
+<tr><td>Total Equity</td><td>~RMB 20.9B</td><td class="up">Growing</td></tr>
+<tr><td>Book Value / Share</td><td>RMB 9.42</td><td>P/B 1.16x</td></tr>
+<tr><td>Current Ratio</td><td>1.14</td><td>Adequate</td></tr>
+<tr><td>Debt/Equity</td><td>89.0%</td><td class="orange">Elevated</td></tr>
+<tr><td>ROE</td><td>24.6%</td><td class="up">Strong</td></tr>
+<tr><td>ROA</td><td>8.9%</td><td class="up">Healthy</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<div class="grid grid-3" style="margin-top:4px">
+<div class="card">
+<div class="title"><span class="icon">📅</span> Quarterly Revenue (RMB B)</div>
+<div class="chart-wrap" style="height:170px"><canvas id="quarterlyRevChart"></canvas></div>
+</div>
+<div class="card">
+<div class="title"><span class="icon">📅</span> Quarterly Net Profit (RMB B)</div>
+<div class="chart-wrap" style="height:170px"><canvas id="quarterlyProfitChart"></canvas></div>
+</div>
+<div class="card">
+<div class="title"><span class="icon">💵</span> Dividend History</div>
+<div class="chart-wrap" style="height:170px"><canvas id="dividendChart"></canvas></div>
+</div>
+</div>
+</div>
+
+<!-- TAB: OPERATIONS -->
+<div id="tab-operations" class="tab-content" style="display:none">
+<div class="grid grid-2">
+<div class="card">
+<div class="title">Business Segments</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Segment</th><th>FY2025 Rev (RMB B)</th><th>YoY Growth</th><th>Gross Margin</th></tr></thead>
+<tbody>
+<tr><td><strong>Nickel Trading</strong></td><td>~RMB 21.8B</td><td class="up">+37.5%</td><td>~8%</td></tr>
+<tr><td><strong>Nickel Smelting</strong></td><td>~RMB 18.4B</td><td class="up">+48.4%</td><td>~39%</td></tr>
+<tr><td><strong>Equipment & Other</strong></td><td>~RMB 0.5B</td><td class="neu">—</td><td>—</td></tr>
+</tbody>
+</table>
+<p style="color:#5a5a7a;font-size:.7rem;margin-top:6px">High-margin smelting segment driving profit growth. Battery-grade MHP and nickel sulfate margins significantly higher.</p>
+</div>
+</div>
+<div class="card">
+<div class="title">Smelting Capacity & Production</div>
+<div style="padding:4px 0">
+<div style="background:rgba(79,195,247,.06);border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid #4fc3f7">
+<div style="font-weight:600;color:#4fc3f7;font-size:.82rem">HPAL Wet Process (ONC Project)</div>
+<div style="color:#a0a0b8;font-size:.74rem;margin-top:3px">Capacity: 120,000 mt nickel/yr. Phase 3 fully ramped. Produces battery-grade MHP, nickel sulfate, cobalt sulfate. Customers: CATL, LG Energy Solution.</div>
+</div>
+<div style="background:rgba(255,167,38,.06);border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid #ffa726">
+<div style="font-weight:600;color:#ffa726;font-size:.82rem">RKEF Pyrometallurgy (HJF + KPS)</div>
+<div style="color:#a0a0b8;font-size:.74rem;margin-top:3px">HJF (Phase 1): 95,000 mt fully ramped. KPS (Phase 2): 280,000 mt progressively commissioning. Nickel content >15%, lowest-cost NPI globally.</div>
+</div>
+<div style="background:rgba(78,204,163,.06);border-radius:8px;padding:12px;border-left:3px solid #4ecca3">
+<div style="font-weight:600;color:#4ecca3;font-size:.82rem">Total Nickel Capacity (Obi Island)</div>
+<div style="color:#a0a0b8;font-size:.74rem;margin-top:3px">~400,000 mt nickel metal equivalent. Global top-tier integrated nickel park. Wet + pyrometallurgy dual-track advantage.</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="grid grid-2" style="margin-top:4px">
+<div class="card">
+<div class="title">Segment Revenue Breakdown</div>
+<div class="chart-wrap"><canvas id="segmentChart"></canvas></div>
+</div>
+<div class="card">
+<div class="title">Key Growth Drivers</div>
+<div style="margin-top:4px">
+<div style="background:rgba(78,204,163,.06);border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid #4ecca3">
+<div style="font-weight:600;color:#4ecca3;font-size:.82rem">Obi Island Integrated Park</div>
+<div style="color:#a0a0b8;font-size:.74rem;margin-top:3px">World's largest integrated nickel processing park. 28% of global new nickel supply (2025). HPAL + RKEF dual-tech advantage.</div>
+</div>
+<div style="background:rgba(79,195,247,.06);border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid #4fc3f7">
+<div style="font-weight:600;color:#4fc3f7;font-size:.82rem">EV Battery Materials</div>
+<div style="color:#a0a0b8;font-size:.74rem;margin-top:3px">Battery-grade nickel sulfate for ternary cathodes. MHP (Mixed Hydroxide Precipitate) refinement. Direct offtake with CATL, LG.</div>
+</div>
+<div style="background:rgba(255,209,102,.06);border-radius:8px;padding:12px;border-left:3px solid #ffd166">
+<div style="font-weight:600;color:#ffd166;font-size:.82rem">A-Share IPO on Shenzhen</div>
+<div style="color:#a0a0b8;font-size:.74rem;margin-top:3px">Proposed A-share listing on Shenzhen Stock Exchange. Could unlock valuation premium and RMB capital markets access.</div>
+</div>
+<div style="background:rgba(255,167,38,.06);border-radius:8px;padding:12px;border-left:3px solid #ffa726">
+<div style="font-weight:600;color:#ffa726;font-size:.82rem">Cost Leadership</div>
+<div style="color:#a0a0b8;font-size:.74rem;margin-top:3px">Ton镍 cash cost ~US$8,500 (12% below industry avg). Third-gen HPAL + digital twin platform. Indonesia ore supply secured via ANTAM JV.</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- TAB: OUTLOOK -->
+<div id="tab-outlook" class="tab-content" style="display:none">
+<div class="grid grid-2">
+<div class="card">
+<div class="title">Q1 2026 Performance</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Metric</th><th>Q1 2026</th><th>Q1 2025</th><th>Change</th></tr></thead>
+<tbody>
+<tr><td>Revenue</td><td>RMB 10.5B</td><td>RMB 8.1B</td><td class="up">+29.1%</td></tr>
+<tr><td>Net Profit (Attr.)</td><td>RMB 1.19B</td><td>RMB 0.66B</td><td class="up">+81.0%</td></tr>
+<tr><td>Drivers</td><td>KPS ramp-up</td><td>ONC ramp-up</td><td class="up">Accelerating</td></tr>
+</tbody>
+</table>
+<p style="color:#5a5a7a;font-size:.7rem;margin-top:6px">KPS production lines successively commissioned, significantly expanded operating scale.</p>
+</div>
+</div>
+<div class="card">
+<div class="title">Nickel Market Context</div>
+<div style="padding:4px 0">
+<div style="background:rgba(79,195,247,.06);border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid #4fc3f7">
+<div style="font-weight:600;color:#4fc3f7;font-size:.82rem">Nickel Price Environment</div>
+<div style="color:#a0a0b8;font-size:.74rem;margin-top:3px">LME nickel volatile (~US$15-20K/mt). Indonesia ore pricing policy changes key risk. High镍 battery demand + stainless recovery supporting floor.</div>
+</div>
+<div style="background:rgba(255,167,38,.06);border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid #ffa726">
+<div style="font-weight:600;color:#ffa726;font-size:.82rem">Indonesia Regulatory Risk</div>
+<div style="color:#a0a0b8;font-size:.74rem;margin-top:3px">Nickel ore benchmark pricing, export regulations, and environmental scrutiny on HPAL tailings. Lygend's long-term offtake contracts mitigate near-term impact.</div>
+</div>
+<div style="background:rgba(78,204,163,.06);border-radius:8px;padding:12px;border-left:3px solid #4ecca3">
+<div style="font-weight:600;color:#4ecca3;font-size:.82rem">Demand Catalysts</div>
+<div style="color:#a0a0b8;font-size:.74rem;margin-top:3px">Tesla 4680, BYD blade battery, ternary cathode demand. Global EV penetration still below 30%. Stainless steel recovery in China.</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="grid grid-2" style="margin-top:4px">
+<div class="card">
+<div class="title">2026 Catalysts & Timeline</div>
+<div style="padding:4px 0">
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.75rem">KPS Full Commissioning</span><span style="color:#4fc3f7;font-size:.78rem">H2 2026</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.75rem">A-Share IPO (Shenzhen)</span><span style="color:#ffa726;font-size:.78rem">Pending Approval</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.75rem">MHP Refinery Completion</span><span style="color:#4ecca3;font-size:.78rem">Progressive</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.75rem">Slag Utilization Project</span><span style="color:#4fc3f7;font-size:.78rem">H2 2026</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.75rem">HY 2026 Results</span><span style="color:#ffd166;font-size:.78rem">Aug 2026</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;">
+<span style="color:#7a7a9a;font-size:.75rem">Ex-Dividend (FY2025)</span><span style="color:#ef5350;font-size:.78rem">27 May 2026</span></div>
+</div>
+</div>
+<div class="card">
+<div class="title">Valuation vs Peers</div>
+<div style="padding:4px 0">
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.75rem">2245.HK P/E (Trailing)</span><span class="up" style="font-size:.78rem">5.2x</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.75rem">2245.HK EV/EBITDA</span><span class="up" style="font-size:.78rem">3.3x</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.75rem">Industry Avg P/E</span><span style="color:#fff;font-size:.78rem">~17x</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.75rem">Intrinsic Value (DCF)</span><span class="up" style="font-size:.78rem">HK$32.38</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.75rem">Upside to Intrinsic</span><span class="up" style="font-size:.78rem">+57%</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;">
+<span style="color:#7a7a9a;font-size:.75rem">52W High Discount</span><span style="color:#ef5350;font-size:.78rem">-55% from peak</span></div>
+</div>
+</div>
+</div>
+
+<div class="verdict">
+<h3>Investment Summary</h3>
+<p>
+<strong style="color:#4fc3f7">Lygend Resources (2245.HK)</strong> — A leading nickel full-chain company with operations spanning trading, HPAL wet-process smelting, and RKEF pyrometallurgy on Obi Island, Indonesia. FY2025 was a breakout year: revenue RMB 40.24B (+37.7%), attributable net profit RMB 2.857B (+61.1%). The ONC HPAL project reached full capacity, KPS pyrometallurgy progressively commissioning, and the EV battery materials segment driving premium margins.
+<br><br>
+<strong style="color:#4ecca3">Strengths:</strong> 
+<span class="tag green">Revenue +37.7%</span>
+<span class="tag green">Profit +61.1%</span>
+<span class="tag green">ROE 24.6%</span>
+<span class="tag green">Cost Leader</span>
+<span class="tag blue">EV Battery Play</span>
+<span class="tag gold">A-Share IPO Catalyst</span>
+<br><br>
+<strong style="color:#ef5350">Risks:</strong>
+<span class="tag red">Debt/Equity 89%</span>
+<span class="tag red">Nickel Price Risk</span>
+<span class="tag red">Indonesia Policy</span>
+<span class="tag red">Environmental Scrutiny</span>
+<span class="tag red">Stock -55% from High</span>
+<br>
+Trades at a steep discount to intrinsic value (P/E ~5.2x, EV/EBITDA 3.3x) versus industry average ~17x P/E. Key catalysts: KPS full commissioning, A-share IPO, potential nickel price recovery. High leverage (D/E 89%) requires monitoring, but strong operating cash flow (RMB 6.46B) supports debt service.
+</p>
+</div>
+
+<footer>
+Data sourced from Lygend Resources FY2025 Annual Report (Mar 2026), HKEX filings, Yahoo Finance, Alpha Spread. For informational purposes only.
+</footer>
+</div>
+
+<script>
+document.querySelectorAll('.tab-btn').forEach(b=>{
+b.addEventListener('click',function(){
+document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
+this.classList.add('active');
+document.querySelectorAll('.tab-content').forEach(c=>c.style.display='none');
+document.getElementById('tab-'+this.dataset.tab).style.display='block';
+})});
+
+const cf={color:'#5a5a7a',borderColor:'rgba(255,255,255,.03)',
+plugins:{legend:{labels:{color:'#a0a0b8',font:{size:9},boxWidth:10}}},
+scales:{x:{ticks:{color:'#5a5a7a',font:{size:8}},grid:{color:'rgba(255,255,255,.02)'}},
+y:{ticks:{color:'#5a5a7a',font:{size:8}},grid:{color:'rgba(255,255,255,.02)'}}}};
+
+new Chart(document.getElementById('revChart'),{type:'bar',data:{
+labels:['FY2021','FY2022','FY2023','FY2024','FY2025'],
+datasets:[{label:'Revenue (RMB B)',
+data:[12.45,18.29,21.06,29.23,40.24],
+backgroundColor:['rgba(79,195,247,.5)','rgba(79,195,247,.5)','rgba(79,195,247,.6)','rgba(79,195,247,.8)','rgba(79,195,247,1)'],
+borderRadius:4}]
+},options:{...cf,responsive:true,maintainAspectRatio:false,
+plugins:{...cf.plugins,legend:{display:false}},
+scales:{...cf.scales,y:{...cf.scales.y,beginAtZero:true}}}});
+
+new Chart(document.getElementById('profitChart'),{type:'bar',data:{
+labels:['FY2021','FY2022','FY2023','FY2024','FY2025'],
+datasets:[{label:'Net Profit (Attr.) (RMB B)',
+data:[0.59,0.96,1.05,1.77,2.86],
+backgroundColor:['rgba(78,204,163,.5)','rgba(78,204,163,.5)','rgba(78,204,163,.6)','rgba(78,204,163,.8)','rgba(78,204,163,1)'],
+borderRadius:4}]
+},options:{...cf,responsive:true,maintainAspectRatio:false,
+plugins:{...cf.plugins,legend:{display:false}},
+scales:{...cf.scales,y:{...cf.scales.y,beginAtZero:true}}}});
+
+new Chart(document.getElementById('ebitdaChart'),{type:'line',data:{
+labels:['FY2021','FY2022','FY2023','FY2024','FY2025'],
+datasets:[
+{label:'Gross Margin %',data:[14.2,15.0,16.0,18.3,19.2],borderColor:'#4fc3f7',tension:.3,pointRadius:3,
+yAxisID:'y'},
+{label:'EBITDA (RMB B)',data:[1.2,2.0,2.8,5.2,7.6],borderColor:'#ffa726',backgroundColor:'rgba(255,167,38,.1)',
+fill:true,tension:.3,pointRadius:3,yAxisID:'y1'}
+]},
+options:{...cf,responsive:true,maintainAspectRatio:false,
+scales:{...cf.scales,
+y:{type:'linear',position:'left',min:0,max:25,ticks:{color:'#4fc3f7',font:{size:8}},grid:{color:'rgba(255,255,255,.02)'}},
+y1:{type:'linear',position:'right',min:0,max:10,ticks:{color:'#ffa726',font:{size:8}},grid:{display:false}}
+},
+plugins:{...cf.plugins,legend:{position:'top',labels:{...cf.plugins.legend.labels,font:{size:8}}}}}});
+
+new Chart(document.getElementById('mixChart'),{type:'doughnut',data:{
+labels:['Nickel Trading','Nickel Smelting','Equipment & Other'],
+datasets:[{data:[53.5,45.2,1.3],
+backgroundColor:['#4fc3f7','#4ecca3','rgba(255,255,255,.1)'],
+borderColor:'#07070f',borderWidth:2}]
+},options:{...cf,cutout:'60%',responsive:true,maintainAspectRatio:false,
+plugins:{...cf.plugins,legend:{position:'bottom',labels:{...cf.plugins.legend.labels,font:{size:8}}}}}});
+
+new Chart(document.getElementById('quarterlyRevChart'),{type:'bar',data:{
+labels:['Q1 2025','H1 2025','9M 2025','FY 2025'],
+datasets:[{label:'Cumulative Rev (RMB B)',
+data:[8.1,18.15,30.0,40.24],
+backgroundColor:'rgba(79,195,247,.7)',borderRadius:4}]
+},options:{...cf,responsive:true,maintainAspectRatio:false,
+plugins:{...cf.plugins,legend:{display:false}},
+scales:{...cf.scales,y:{...cf.scales.y,beginAtZero:true}}}});
+
+new Chart(document.getElementById('quarterlyProfitChart'),{type:'bar',data:{
+labels:['Q1 2025','H1 2025','9M 2025','FY 2025'],
+datasets:[{label:'Cumulative NP Attr (RMB B)',
+data:[0.66,1.43,2.1,2.86],
+backgroundColor:'rgba(78,204,163,.7)',borderRadius:4}]
+},options:{...cf,responsive:true,maintainAspectRatio:false,
+plugins:{...cf.plugins,legend:{display:false}},
+scales:{...cf.scales,y:{...cf.scales.y,beginAtZero:true}}}});
+
+new Chart(document.getElementById('dividendChart'),{type:'bar',data:{
+labels:['FY2022','FY2023','FY2024','FY2025'],
+datasets:[{label:'Dividend (RMB/share)',
+data:[0.34,0.22,0.35,0.60],
+backgroundColor:['rgba(255,209,102,.5)','rgba(255,209,102,.5)','rgba(255,209,102,.7)','rgba(255,209,102,1)'],
+borderRadius:4}]
+},options:{...cf,responsive:true,maintainAspectRatio:false,
+plugins:{...cf.plugins,legend:{display:false}},
+scales:{...cf.scales,y:{...cf.scales.y,beginAtZero:true}}}});
+
+new Chart(document.getElementById('segmentChart'),{type:'doughnut',data:{
+labels:['Nickel Trading','Nickel Smelting','Equipment'],
+datasets:[{data:[53.5,45.2,1.3],
+backgroundColor:['#4fc3f7','#4ecca3','rgba(255,255,255,.1)'],
+borderColor:'#07070f',borderWidth:2}]
+},options:{...cf,cutout:'60%',responsive:true,maintainAspectRatio:false,
+plugins:{...cf.plugins,legend:{position:'right',labels:{...cf.plugins.legend.labels,font:{size:8}}}}}});
+</script>
+</body>
+</html>
