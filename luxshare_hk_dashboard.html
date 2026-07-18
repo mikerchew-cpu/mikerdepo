@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luxshare ICT (02475.HK) — HK Stock Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
+body{background:#0b0b1a;color:#e0e0e0;padding:20px}
+.container{max-width:1400px;margin:0 auto}
+
+/* Header HK Exchange style */
+.header{background:linear-gradient(135deg,#0d1b2a 0%,#1b2838 50%,#1a3a5c 100%);border-radius:16px;padding:30px 40px;margin-bottom:24px;border:1px solid rgba(255,255,255,.08);position:relative;overflow:hidden}
+.header::before{content:'HKEX';position:absolute;right:30px;top:20px;font-size:3rem;font-weight:900;color:rgba(79,195,247,.06);letter-spacing:4px}
+.header h1{font-size:1.8rem;font-weight:700;color:#fff}
+.header .ticker{background:#4fc3f7;color:#0b0b1a;padding:2px 12px;border-radius:6px;font-weight:700;font-size:1.1rem}
+.header .exch{color:#7a7a9a;font-size:.85rem}
+.header .price-row{display:flex;align-items:baseline;gap:16px;margin-top:10px;flex-wrap:wrap}
+.header .price-row .price{font-size:2.4rem;font-weight:700;color:#fff}
+.header .price-row .change{font-size:1.1rem;font-weight:600;padding:2px 10px;border-radius:6px}
+.header .price-row .change.up{background:rgba(78,204,163,.15);color:#4ecca3}
+.header .price-row .change.down{background:rgba(239,83,80,.15);color:#ef5350}
+.header .price-row .change.flat{background:rgba(255,255,255,.05);color:#a0a0b8}
+.header .meta{color:#7a7a9a;font-size:.82rem;margin-top:6px;display:flex;gap:20px;flex-wrap:wrap}
+.header .meta span{display:flex;align-items:center;gap:4px}
+
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:20px}
+.stat-card{background:linear-gradient(145deg,#12122a,#0e0e22);border-radius:10px;padding:14px 16px;border:1px solid rgba(255,255,255,.05)}
+.stat-card .lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.4px;color:#5a5a8a;margin-bottom:2px}
+.stat-card .val{font-size:1.15rem;font-weight:700;color:#fff}
+.stat-card .sub{font-size:.75rem;color:#7a7a9a;margin-top:1px}
+.stat-card .val.up{color:#4ecca3}
+.stat-card .val.down{color:#ef5350}
+
+.tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.tab-btn{padding:10px 22px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#a0a0b8;cursor:pointer;font-size:.9rem;font-weight:500;transition:.2s}
+.tab-btn:hover{background:rgba(255,255,255,.1);color:#fff}
+.tab-btn.active{background:#4fc3f7;color:#0b0b1a;border-color:#4fc3f7;font-weight:700}
+
+.grid{display:grid;gap:16px;margin-bottom:20px}
+.grid-2{grid-template-columns:1fr 1fr}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+
+.card{background:linear-gradient(145deg,#12122a,#0e0e22);border-radius:14px;padding:20px;border:1px solid rgba(255,255,255,.06)}
+.card .title{font-size:.95rem;font-weight:600;color:#fff;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card .title .badge{font-size:.65rem;background:rgba(79,195,247,.15);color:#4fc3f7;padding:2px 8px;border-radius:4px}
+.chart-wrap{height:240px;position:relative}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{text-align:left;padding:9px 10px;color:#5a5a8a;font-weight:600;font-size:.7rem;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid rgba(255,255,255,.06)}
+td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.03);color:#c0c0d0}
+tr:hover td{background:rgba(255,255,255,.02)}
+td.up{color:#4ecca3}
+td.down{color:#ef5350}
+
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;margin:1px 3px 1px 0}
+.tag.green{background:rgba(78,204,163,.12);color:#4ecca3}
+.tag.red{background:rgba(239,83,80,.12);color:#ef5350}
+.tag.blue{background:rgba(79,195,247,.12);color:#4fc3f7}
+.tag.orange{background:rgba(255,167,38,.12);color:#ffa726}
+
+.alert{border-radius:10px;padding:14px 18px;margin-top:16px;font-size:.82rem;line-height:1.5}
+.alert.info{background:rgba(79,195,247,.06);border:1px solid rgba(79,195,247,.15);color:#a0c8e8}
+.alert.info strong{color:#4fc3f7}
+
+footer{text-align:center;padding:30px 0 10px;color:#3a3a5a;font-size:.75rem}
+
+@media(max-width:900px){
+.grid-2,.grid-3{grid-template-columns:1fr}
+.header{padding:20px}
+.header h1{font-size:1.3rem}
+.header .price-row .price{font-size:1.8rem}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- HEADER -->
+<div class="header">
+<div><span class="ticker">02475.HK</span> <span class="exch">HKEX Main Board</span></div>
+<h1>Luxshare ICT <span style="font-weight:400;color:#7a7a9a;font-size:1rem">立讯精密</span></h1>
+<div class="price-row">
+<span class="price">HK$62.85</span>
+<span class="change down">-0.43 (-0.68%)</span>
+</div>
+<div class="meta">
+<span>IPO: HK$63.28 (Jul 9, 2026)</span>
+<span>Board Lot: 100 shares</span>
+<span>Mkt Cap: HK$546.8B</span>
+<span>Listed H-Shares: 383.5M</span>
+</div>
+</div>
+
+<!-- STAT ROW -->
+<div class="stat-row">
+<div class="stat-card"><div class="lbl">Day Range</div><div class="val">62.50 – 63.40</div><div class="sub">Intraday</div></div>
+<div class="stat-card"><div class="lbl">Open / Prev Close</div><div class="val">63.25 / 63.28</div><div class="sub">IPO reference</div></div>
+<div class="stat-card"><div class="lbl">Shares Traded</div><div class="val">12.4M</div><div class="sub">Volume</div></div>
+<div class="stat-card"><div class="lbl">Turnover</div><div class="val">HK$780M</div><div class="sub">~US$100M</div></div>
+<div class="stat-card"><div class="lbl">SZ Equivalent</div><div class="val up">RMB 60.47</div><div class="sub">002475.SZ</div></div>
+<div class="stat-card"><div class="lbl">P/E (TTM)</div><div class="val">17.1x</div><div class="sub">Trailing</div></div>
+<div class="stat-card"><div class="lbl">Div Yield (SZ)</div><div class="val">0.9%</div><div class="sub">0.30 RMB/share</div></div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+<button class="tab-btn active" data-tab="overview">Overview</button>
+<button class="tab-btn" data-tab="ipo">IPO Details</button>
+<button class="tab-btn" data-tab="financials">Financials</button>
+<button class="tab-btn" data-tab="segments">Segments</button>
+</div>
+
+<!-- TAB: OVERVIEW -->
+<div id="tab-overview" class="tab-content active">
+<div class="grid grid-2">
+<div class="card">
+<div class="title">Revenue & Profit Trend (RMB B)</div>
+<div class="chart-wrap"><canvas id="revenueChart"></canvas></div>
+</div>
+<div class="card">
+<div class="title">Growth by Segment <span class="badge">FY2025</span></div>
+<div class="chart-wrap"><canvas id="segmentGrowthChart"></canvas></div>
+</div>
+</div>
+
+<div class="grid grid-3" style="margin-top:4px">
+<div class="card">
+<div class="title">Segment Revenue Mix</div>
+<div class="chart-wrap" style="height:200px"><canvas id="segmentMixChart"></canvas></div>
+</div>
+<div class="card">
+<div class="title">Geographic Split</div>
+<div class="chart-wrap" style="height:200px"><canvas id="geoChart"></canvas></div>
+</div>
+<div class="card">
+<div class="title">Key Financial Ratios</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Ratio</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>P/E (Trailing)</td><td>17.1x</td></tr>
+<tr><td>P/S</td><td>0.86x</td></tr>
+<tr><td>P/B</td><td>3.3x</td></tr>
+<tr><td>PEG</td><td class="up">0.67</td></tr>
+<tr><td>ROE</td><td class="up">19.1%</td></tr>
+<tr><td>Net Margin</td><td>5.0%</td></tr>
+<tr><td>Debt/Equity</td><td class="down">101.5%</td></tr>
+<tr><td>EV/EBITDA</td><td>14.4x</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<div class="alert info">
+<strong>IPO Summary:</strong> Listed Jul 9, 2026 at HK$63.28. Raised HK$24.3B (US$3.1B) — Hong Kong's largest IPO of 2026. Joint sponsors: CITIC Securities, Goldman Sachs, CICC. Tepid debut, opened flat. Consensus analyst target: <strong>RMB 75.25</strong> (+24% upside from SZ close).
+</div>
+</div>
+
+<!-- TAB: IPO DETAILS -->
+<div id="tab-ipo" class="tab-content" style="display:none">
+<div class="grid grid-2">
+<div class="card">
+<div class="title">IPO Terms</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>Details</th></tr></thead>
+<tbody>
+<tr><td>Listing Date</td><td>July 9, 2026</td></tr>
+<tr><td>Offer Price</td><td><strong>HK$63.28</strong> (top of range)</td></tr>
+<tr><td>Total Shares Offered</td><td>383,472,800 H-shares</td></tr>
+<tr><td>Hong Kong Public Offer</td><td>38,347,300 (10%)</td></tr>
+<tr><td>International Offer</td><td>345,125,500 (90%)</td></tr>
+<tr><td>Greenshoe (Over-allot)</td><td>57,520,920 (15%)</td></tr>
+<tr><td>Gross Proceeds</td><td>~HK$24.27B (US$3.1B)</td></tr>
+<tr><td>Net Proceeds (after fees)</td><td>HK$24.04B</td></tr>
+<tr><td>Board Lot Size</td><td>100 shares (~HK$6,328)</td></tr>
+<tr><td>Stock Code</td><td>02475.HK</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="card">
+<div class="title">Underwriters & Sponsors</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Role</th><th>Institution</th></tr></thead>
+<tbody>
+<tr><td>Joint Sponsors, Global Coordinators</td><td><strong>CITIC Securities</strong></td></tr>
+<tr><td>Joint Sponsors, Global Coordinators</td><td><strong>Goldman Sachs</strong></td></tr>
+<tr><td>Joint Sponsors, Global Coordinators</td><td><strong>CICC</strong></td></tr>
+<tr><td>Joint Global Coordinators</td><td>HSBC</td></tr>
+<tr><td>Joint Global Coordinators</td><td>GF Securities (HK)</td></tr>
+<tr><td>Joint Global Coordinators</td><td>Guosen Securities (HK)</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<div class="grid grid-2" style="margin-top:16px">
+<div class="card">
+<div class="title">Use of Proceeds</div>
+<div style="height:200px"><canvas id="proceedsChart"></canvas></div>
+</div>
+<div class="card">
+<div class="title">IPO Details & Rationale</div>
+<div style="margin-top:8px">
+<div style="background:rgba(79,195,247,.06);border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid #4fc3f7">
+<div style="font-weight:600;color:#4fc3f7;font-size:.82rem">Why Hong Kong?</div>
+<div style="color:#b0b0c8;font-size:.78rem;margin-top:3px">Global investor access beyond mainland China; international M&A currency for acquisitions; closer to Apple and other global HQ operations</div>
+</div>
+<div style="background:rgba(78,204,163,.06);border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid #4ecca3">
+<div style="font-weight:600;color:#4ecca3;font-size:.82rem">Market Context</div>
+<div style="color:#b0b0c8;font-size:.78rem;margin-top:3px">Luxshare joins a wave of Chinese tech listings in HK in 2026. HK's biggest IPO this year, signaling revival of the city's IPO market. Other Apple suppliers (Lingyi) also listing.</div>
+</div>
+<div style="background:rgba(255,167,38,.06);border-radius:8px;padding:12px;border-left:3px solid #ffa726">
+<div style="font-weight:600;color:#ffa726;font-size:.82rem">Debut Performance</div>
+<div style="color:#b0b0c8;font-size:.78rem;margin-top:3px">Opened at HK$63.25 (vs IPO HK$63.28), described as "lackluster" and "tepid". Seven HK listings same day saw mixed debuts. Trading volume moderate.</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- TAB: FINANCIALS -->
+<div id="tab-financials" class="tab-content" style="display:none">
+<div class="grid grid-2">
+<div class="card">
+<div class="title">Income Statement (RMB M)</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Metric</th><th>FY2025</th><th>FY2024</th><th>Change</th></tr></thead>
+<tbody>
+<tr><td>Revenue</td><td>332,344</td><td>268,795</td><td class="up">+23.6%</td></tr>
+<tr><td>Gross Profit</td><td>38,444</td><td>27,070</td><td class="up">+42.0%</td></tr>
+<tr><td>Gross Margin</td><td>11.57%</td><td>10.07%</td><td class="up">+150 bps</td></tr>
+<tr><td>EBITDA</td><td>26,255</td><td>21,104</td><td class="up">+24.4%</td></tr>
+<tr><td>EBIT</td><td>13,653</td><td>10,513</td><td class="up">+29.9%</td></tr>
+<tr><td>Net Profit (Attr.)</td><td>16,600</td><td>13,366</td><td class="up">+24.2%</td></tr>
+<tr><td>EPS (Diluted)</td><td>RMB 2.26</td><td>RMB 1.85</td><td class="up">+22.2%</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="card">
+<div class="title">Balance Sheet & Cash Flow</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Metric</th><th>FY2025</th><th>FY2024</th></tr></thead>
+<tbody>
+<tr><td>Total Assets</td><td>RMB 198.5B*</td><td>RMB 175.0B*</td></tr>
+<tr><td>Cash & Equivalents</td><td class="up">RMB 60.6B</td><td>RMB 52.0B*</td></tr>
+<tr><td>Total Debt</td><td>RMB 89.7B</td><td>RMB 72.0B*</td></tr>
+<tr><td>Shareholders' Equity</td><td>~RMB 88.4B*</td><td>~RMB 80.0B*</td></tr>
+<tr><td>Operating Cash Flow</td><td>RMB 21.3B</td><td>RMB 18.5B*</td></tr>
+<tr><td>Free Cash Flow</td><td class="down">-RMB 579M</td><td>+RMB 15.0B</td></tr>
+<tr><td>CapEx</td><td>~RMB 21.9B</td><td>~RMB 3.5B</td></tr>
+</tbody>
+</table>
+<p style="color:#5a5a8a;font-size:.7rem;margin-top:6px">* Estimated from reported data</p>
+</div>
+</div>
+</div>
+
+<div class="card" style="margin-top:16px">
+<div class="title">Quarterly Progression (FY2025)</div>
+<div class="chart-wrap" style="height:200px"><canvas id="quarterlyChart"></canvas></div>
+</div>
+</div>
+
+<!-- TAB: SEGMENTS -->
+<div id="tab-segments" class="tab-content" style="display:none">
+<div class="grid grid-2">
+<div class="card">
+<div class="title">Segment Revenue Breakdown</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Segment</th><th>FY2025 (RMB B)</th><th>Growth</th><th>% of Total</th><th>Gross Margin</th></tr></thead>
+<tbody>
+<tr><td><strong>Consumer Electronics</strong></td><td>~264.5</td><td class="up">+13.4%</td><td>79.5%</td><td>~10%</td></tr>
+<tr><td><strong>Automotive Electronics</strong></td><td>39.25</td><td class="up">+185.3%</td><td>11.8%</td><td>~15%*</td></tr>
+<tr><td><strong>Comms & Data Center</strong></td><td>24.57</td><td class="up">+33.8%</td><td>7.4%</td><td>18.4%</td></tr>
+<tr><td><strong>Other</strong></td><td>~4.0</td><td>~</td><td>1.3%</td><td>—</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="card">
+<div class="title">Growth Drivers</div>
+<div style="margin-top:4px">
+<div style="background:rgba(78,204,163,.06);border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid #4ecca3">
+<div style="font-weight:600;color:#4ecca3;font-size:.82rem">Automotive +185% (Leoni)</div>
+<div style="color:#b0b0c8;font-size:.76rem">Leoni AG acquisition made Luxshare a global Tier-1 auto supplier. Wiring harnesses, smart cockpit, intelligent driving. 1st year profitability improvement.</div>
+</div>
+<div style="background:rgba(79,195,247,.06);border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid #4fc3f7">
+<div style="font-weight:600;color:#4fc3f7;font-size:.82rem">Data Center +33.8% (AI)</div>
+<div style="color:#b0b0c8;font-size:.76rem">AI server demand driving high-speed interconnect, optical, liquid cooling, power management. Gross margin improved 2pp to 18.4%.</div>
+</div>
+<div style="background:rgba(255,167,38,.06);border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid #ffa726">
+<div style="font-weight:600;color:#ffa726;font-size:.82rem">Consumer +13.4% (Apple + AI)</div>
+<div style="color:#b0b0c8;font-size:.76rem">AirPods, iPhone, Vision Pro assembly. Edge AI, AI smartphones, AI PCs, wearables, AR/VR. Expanding ODM capabilities.</div>
+</div>
+<div style="background:rgba(239,83,80,.06);border-radius:8px;padding:12px;border-left:3px solid #ef5350">
+<div style="font-weight:600;color:#ef5350;font-size:.82rem">OpenAI Partnership</div>
+<div style="color:#b0b0c8;font-size:.76rem">Partnered with OpenAI for future device production — potential to reduce Apple dependency and open new revenue streams.</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<footer>
+Data sourced from Luxshare ICT FY2025 Annual Report, HKEX prospectus, and Bloomberg. For informational purposes only. Not investment advice.
+</footer>
+</div>
+
+<script>
+document.querySelectorAll('.tab-btn').forEach(b=>{
+b.addEventListener('click',function(){
+document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
+this.classList.add('active');
+document.querySelectorAll('.tab-content').forEach(c=>c.style.display='none');
+document.getElementById('tab-'+this.dataset.tab).style.display='block';
+})});
+
+const cf={color:'#5a5a8a',borderColor:'rgba(255,255,255,.04)',
+plugins:{legend:{labels:{color:'#a0a0b8',font:{size:10},boxWidth:12}}},
+scales:{x:{ticks:{color:'#5a5a8a',font:{size:9}},grid:{color:'rgba(255,255,255,.03)'}},
+y:{ticks:{color:'#5a5a8a',font:{size:9}},grid:{color:'rgba(255,255,255,.03)'}}}};
+
+new Chart(document.getElementById('revenueChart'),{type:'bar',data:{
+labels:['FY2021','FY2022','FY2023','FY2024','FY2025'],
+datasets:[
+{label:'Revenue (RMB B)',data:[154.1,214.0,231.9,268.8,332.3],backgroundColor:'rgba(79,195,247,.7)',borderRadius:4,yAxisID:'y'},
+{label:'Net Profit (RMB B)',data:[7.07,9.16,10.95,13.37,16.60],backgroundColor:'rgba(78,204,163,.7)',borderRadius:4,yAxisID:'y1'}
+]},
+options:{...cf,responsive:true,maintainAspectRatio:false,
+scales:{...cf.scales,
+y:{type:'linear',position:'left',min:0,ticks:{...cf.scales.y.ticks,color:'#4fc3f7'},grid:{color:'rgba(255,255,255,.03)'}},
+y1:{type:'linear',position:'right',min:0,ticks:{...cf.scales.y.ticks,color:'#4ecca3'},grid:{display:false}}
+},
+plugins:{...cf.plugins,legend:{...cf.plugins.legend,position:'top'}}}});
+
+new Chart(document.getElementById('segmentGrowthChart'),{type:'bar',data:{
+labels:['Consumer Elec.','Automotive','Data Center'],
+datasets:[{label:'Growth %',data:[13.4,185.3,33.8],
+backgroundColor:['rgba(79,195,247,.7)','rgba(78,204,163,.7)','rgba(255,167,38,.7)'],
+borderRadius:4}]
+},options:{...cf,plugins:{...cf.plugins,legend:{display:false}},
+scales:{...cf.scales,y:{...cf.scales.y,beginAtZero:true}}}});
+
+new Chart(document.getElementById('segmentMixChart'),{type:'doughnut',data:{
+labels:['Consumer Electronics','Automotive','Data Center','Other'],
+datasets:[{data:[79.5,11.8,7.4,1.3],
+backgroundColor:['#4fc3f7','#4ecca3','#ffa726','rgba(255,255,255,.15)'],
+borderColor:'#0b0b1a',borderWidth:2}]
+},options:{...cf,cutout:'62%',responsive:true,maintainAspectRatio:false,
+plugins:{...cf.plugins,legend:{position:'bottom',labels:{...cf.plugins.legend.labels,font:{size:9}}}}}});
+
+new Chart(document.getElementById('geoChart'),{type:'polarArea',data:{
+labels:['Overseas/Export','Domestic (China)'],
+datasets:[{data:[65,35],
+backgroundColor:['rgba(78,204,163,.7)','rgba(79,195,247,.7)'],
+borderColor:'#0b0b1a',borderWidth:1}]
+},options:{...cf,responsive:true,maintainAspectRatio:false,
+plugins:{...cf.plugins,legend:{position:'bottom',labels:{...cf.plugins.legend.labels,font:{size:9}}}}}});
+
+new Chart(document.getElementById('proceedsChart'),{type:'doughnut',data:{
+labels:['Global R&D Expansion','Automotive (Leoni)','Data Center / AI','Working Capital','General Corporate'],
+datasets:[{data:[30,25,20,15,10],
+backgroundColor:['#4fc3f7','#4ecca3','#ffa726','rgba(255,255,255,.2)','rgba(255,255,255,.1)'],
+borderColor:'#0b0b1a',borderWidth:2}]
+},options:{...cf,cutout:'62%',responsive:true,maintainAspectRatio:false,
+plugins:{...cf.plugins,legend:{position:'right',labels:{...cf.plugins.legend.labels,font:{size:9}}}}}});
+
+new Chart(document.getElementById('quarterlyChart'),{type:'bar',data:{
+labels:['Q1 FY25','Q2 FY25','Q3 FY25','Q4 FY25'],
+datasets:[
+{label:'Revenue (RMB B)',data:[62.5,73.0,96.4,100.5],backgroundColor:'rgba(79,195,247,.7)',borderRadius:4},
+{label:'Net Profit (RMB B)',data:[3.05,4.0,5.08,4.47],backgroundColor:'rgba(78,204,163,.7)',borderRadius:4}
+]},
+options:{...cf,plugins:{...cf.plugins,legend:{position:'top'}},
+scales:{...cf.scales,y:{...cf.scales.y,beginAtZero:true}}}});
+</script>
+</body>
+</html>
