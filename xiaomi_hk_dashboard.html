@@ -7,417 +7,464 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
-body{background:#07070f;color:#e0e0e0;padding:16px}
-.container{max-width:1500px;margin:0 auto}
-.header{background:linear-gradient(135deg,#1a0a0a,#2d1a1a 50%,#3d1a0a 100%);border-radius:16px;padding:24px 32px;margin-bottom:20px;border:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden}
-.header::before{content:'1810';position:absolute;right:30px;top:10px;font-size:5rem;font-weight:900;color:rgba(255,107,53,.05);letter-spacing:4px}
-.header h1{font-size:1.6rem;font-weight:700;color:#fff}
-.header h1 span{color:#ff6b35}
-.header .sub{color:#6a6a8a;font-size:.82rem;margin-top:4px}
-.price-row{display:flex;align-items:baseline;gap:16px;margin-top:10px;flex-wrap:wrap}
-.price-row .price{font-size:2.4rem;font-weight:700;color:#fff}
-.price-row .change{padding:2px 10px;border-radius:6px;font-size:.9rem;font-weight:600}
-.price-row .change.down{background:rgba(239,83,80,.12);color:#ef5350}
-.price-row .change.up{background:rgba(78,204,163,.12);color:#4ecca3}
-.meta{color:#6a6a8a;font-size:.78rem;margin-top:8px;display:flex;gap:20px;flex-wrap:wrap}
-.meta b{color:#c0c0d0}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:20px}
-.stat-box{background:rgba(255,255,255,.02);border-radius:10px;padding:12px 14px;border:1px solid rgba(255,255,255,.04)}
-.stat-box .lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.3px;color:#5a5a7a;margin-bottom:2px}
-.stat-box .val{font-size:1.1rem;font-weight:700;color:#fff}
-.stat-box .sub{font-size:.7rem;color:#6a6a8a;margin-top:1px}
-.tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
-.tab-btn{padding:9px 18px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#7a7a9a;cursor:pointer;font-size:.82rem;font-weight:500;transition:.2s}
-.tab-btn:hover{background:rgba(255,255,255,.06);color:#e0e0e0}
-.tab-btn.active{background:#ff6b35;color:#07070f;border-color:#ff6b35;font-weight:700}
-.grid{display:grid;gap:14px;margin-bottom:16px}
-.grid-2{grid-template-columns:1fr 1fr}
-.grid-3{grid-template-columns:repeat(3,1fr)}
+body{background:#0f0f1a;color:#e0e0e0;padding:20px}
+.container{max-width:1400px;margin:0 auto}
+
+.header{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);border-radius:16px;padding:30px 40px;margin-bottom:24px;border:1px solid rgba(255,255,255,.08)}
+.header h1{font-size:2.2rem;font-weight:700;color:#fff}
+.header .ticker{color:#e94560;font-weight:600;font-size:1.1rem}
+.header .sub{color:#a0a0b8;margin-top:6px;font-size:.95rem}
+.header .price{font-size:2rem;font-weight:700;color:#4ecca3;margin-top:8px}
+.header .price span{font-size:1rem;color:#a0a0b8;font-weight:400}
+
+.tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.tab-btn{padding:10px 22px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#a0a0b8;cursor:pointer;font-size:.9rem;font-weight:500;transition:.2s}
+.tab-btn:hover{background:rgba(255,255,255,.1);color:#fff}
+.tab-btn.active{background:#e94560;color:#fff;border-color:#e94560}
+
+.grid{display:grid;gap:16px;margin-bottom:20px}
 .grid-4{grid-template-columns:repeat(4,1fr)}
-.card{background:linear-gradient(145deg,#101028,#0c0c20);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,.05)}
-.card .title{font-size:.85rem;font-weight:600;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.chart-wrap{height:230px;position:relative}
-.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:.78rem}
-th{text-align:left;padding:7px 8px;color:#5a5a7a;font-weight:600;font-size:.65rem;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid rgba(255,255,255,.05)}
-td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.02);color:#b0b0c8}
-tr:hover td{background:rgba(255,255,255,.015)}
-td.up{color:#4ecca3}
-td.down{color:#ef5350}
-.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.65rem;margin:1px 3px 1px 0;font-weight:600}
-.tag.o{background:rgba(255,107,53,.12);color:#ff6b35}
-.tag.g{background:rgba(78,204,163,.12);color:#4ecca3}
-.tag.b{background:rgba(79,195,247,.12);color:#4fc3f7}
-.tag.r{background:rgba(239,83,80,.12);color:#ef5350}
-.alert{border-radius:10px;padding:14px 18px;margin-top:14px;font-size:.78rem;line-height:1.6}
-.alert.info{background:rgba(255,107,53,.04);border:1px solid rgba(255,107,53,.1);color:#b0b0c8}
-.alert.info strong{color:#ff6b35}
-.verdict{background:linear-gradient(135deg,rgba(255,107,53,.04),rgba(255,107,53,.01));border:1px solid rgba(255,107,53,.12);border-radius:12px;padding:20px;margin-top:14px}
-.verdict h3{color:#ff6b35;font-size:.95rem;margin-bottom:6px}
-.verdict p{color:#a0a0b8;font-size:.8rem;line-height:1.6}
-footer{text-align:center;padding:24px 0 8px;color:#3a3a5a;font-size:.7rem}
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
-.kpi-card{background:rgba(255,255,255,.02);border-radius:8px;padding:10px 12px;text-align:center;border:1px solid rgba(255,255,255,.04)}
-.kpi-card .kv{font-size:1rem;font-weight:700;color:#fff}
-.kpi-card .kl{font-size:.6rem;text-transform:uppercase;letter-spacing:.2px;color:#5a5a7a;margin-top:1px}
-.kpi-card .kv.up{color:#4ecca3}
-.kpi-card .kv.down{color:#ef5350}
-.kpi-card .kv.o{color:#ff6b35}
-@media(max-width:1000px){
-.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
-.kpi-grid{grid-template-columns:repeat(2,1fr)}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-2{grid-template-columns:1fr 1fr}
+
+.card{background:linear-gradient(145deg,#1a1a2e,#16162a);border-radius:14px;padding:20px;border:1px solid rgba(255,255,255,.06);transition:.2s}
+.card:hover{border-color:rgba(255,255,255,.15)}
+
+.card .label{font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;color:#7a7a9a;margin-bottom:4px}
+.card .value{font-size:1.6rem;font-weight:700;color:#fff}
+.card .change{font-size:.85rem;margin-top:2px}
+.card .change.pos{color:#4ecca3}
+.card .change.neg{color:#e94560}
+.card .change.neu{color:#a0a0b8}
+
+.card-chart{height:260px;position:relative}
+
+.table-wrap{overflow-x:auto;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{text-align:left;padding:10px 12px;color:#7a7a9a;font-weight:600;text-transform:uppercase;font-size:.75rem;letter-spacing:.5px;border-bottom:1px solid rgba(255,255,255,.08)}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);color:#c0c0d0}
+tr:hover td{background:rgba(255,255,255,.03)}
+td.pos{color:#4ecca3}
+td.neg{color:#e94560}
+
+.section-title{font-size:1.1rem;font-weight:600;color:#fff;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title .count{font-size:.75rem;background:#e94560;padding:2px 10px;border-radius:20px;color:#fff}
+
+.tag{display:inline-block;padding:3px 10px;border-radius:6px;font-size:.75rem;margin:2px 4px 2px 0}
+.tag.green{background:rgba(78,204,163,.15);color:#4ecca3}
+.tag.red{background:rgba(233,69,96,.15);color:#e94560}
+.tag.blue{background:rgba(15,52,96,.4);color:#8ab4f8}
+
+.verdict{background:linear-gradient(135deg,rgba(78,204,163,.08),rgba(78,204,163,.02));border:1px solid rgba(78,204,163,.2);border-radius:14px;padding:24px;margin-top:16px}
+.verdict h3{color:#4ecca3;margin-bottom:8px}
+.verdict p{color:#b0b0c8;line-height:1.6;font-size:.9rem}
+.verdict .risks{color:#e94560}
+
+@media(max-width:900px){
+.grid-4,.grid-3,.grid-2{grid-template-columns:repeat(2,1fr)}
+.header{padding:20px}
+.header h1{font-size:1.5rem}
+}
+@media(max-width:550px){
+.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
+
 <div class="container">
 
 <div class="header">
-<h1>Xiaomi Corporation <span>小米集团</span></h1>
-<div class="sub">1810.HK  /  81810.HK (RMB Counter)  |  Human × Car × Home Ecosystem</div>
-<div class="price-row">
-<span class="price">HK$26.88</span>
-<span class="change down">-2.25%</span>
-<span style="font-size:.8rem;color:#6a6a8a">52W: 21.30 – 59.90</span>
-</div>
-<div class="meta">
-<span><b>Mkt Cap:</b> ~HK$670B</span>
-<span><b>P/E:</b> 17.63x</span>
-<span><b>P/B:</b> 2.48x</span>
-<span><b>Div Yield:</b> 0%</span>
-<span><b>ROE:</b> 14.0%</span>
-</div>
+<div><span class="ticker">1810.HK / 81810.HK (RMB Counter)</span> <span style="color:#7a7a9a;font-size:.85rem">| Xiaomi Corporation 小米集团</span></div>
+<h1>Stock Dashboard <span style="color:#e94560;">FY2025</span></h1>
+<div class="price">HK$26.88 <span>as of Mar 2026 &middot; Market Cap ~HK$670B &middot; P/E 17.6x</span></div>
+<div class="sub">Human × Car × Home Ecosystem &middot; 754M global MAU &middot; 165M phone shipments &middot; 411K EV deliveries</div>
 </div>
 
-<div class="kpi-grid">
-<div class="kpi-card"><div class="kv up">RMB 457.3B</div><div class="kl">Revenue FY2025</div></div>
-<div class="kpi-card"><div class="kv up">+25.0%</div><div class="kl">Revenue Growth</div></div>
-<div class="kpi-card"><div class="kv up">RMB 39.2B</div><div class="kl">Adj. Net Profit</div></div>
-<div class="kpi-card"><div class="kv up">+43.8%</div><div class="kl">Adj. Profit Growth</div></div>
-<div class="kpi-card"><div class="kv o">RMB 106.1B</div><div class="kl">EV & AI Revenue</div></div>
-<div class="kpi-card"><div class="kv up">+223.8%</div><div class="kl">EV & AI Growth</div></div>
-<div class="kpi-card"><div class="kv o">411,082</div><div class="kl">EV Deliveries</div></div>
-<div class="kpi-card"><div class="kv up">165.2M</div><div class="kl">Phone Shipments</div></div>
-</div>
-
-<div class="tabs">
+<div class="tabs" id="tabs">
 <button class="tab-btn active" data-tab="overview">Overview</button>
-<button class="tab-btn" data-tab="financials">Financials</button>
-<button class="tab-btn" data-tab="ev">EV & AI Business</button>
-<button class="tab-btn" data-tab="ecosystem">Ecosystem</button>
+<button class="tab-btn" data-tab="income">Revenue &amp; Profit</button>
+<button class="tab-btn" data-tab="balance">Balance Sheet</button>
+<button class="tab-btn" data-tab="ratios">Key Metrics</button>
+<button class="tab-btn" data-tab="segment">Segments</button>
 </div>
 
-<!-- TAB: OVERVIEW -->
 <div id="tab-overview" class="tab-content active">
+<div class="grid grid-4">
+<div class="card"><div class="label">Revenue (FY25)</div><div class="value">RMB 457.3B</div><div class="change pos">+25.0% YoY</div></div>
+<div class="card"><div class="label">Adj. Net Profit</div><div class="value">RMB 39.2B</div><div class="change pos">+43.8% YoY</div></div>
+<div class="card"><div class="label">Net Profit (GAAP)</div><div class="value">RMB 41.6B</div><div class="change pos">+76.3% YoY</div></div>
+<div class="card"><div class="label">Gross Margin</div><div class="value">22.3%</div><div class="change pos">+50 bps YoY</div></div>
+<div class="card"><div class="label">EV &amp; AI Revenue</div><div class="value">RMB 106.1B</div><div class="change pos">+223.8% YoY</div></div>
+<div class="card"><div class="label">EV Deliveries</div><div class="value">411,082</div><div class="change pos">+200.4% YoY</div></div>
+<div class="card"><div class="label">Smartphone Shipments</div><div class="value">165.2M</div><div class="change pos">Top 3 globally</div></div>
+<div class="card"><div class="label">R&amp;D Spend</div><div class="value">RMB 33.1B</div><div class="change pos">+37.8% YoY</div></div>
+</div>
+
+<div class="grid grid-2" style="margin-top:16px">
+<div class="card">
+<div class="section-title">Revenue Trend (RMB Billion)</div>
+<div class="card-chart"><canvas id="revTrendChart"></canvas></div>
+</div>
+<div class="card">
+<div class="section-title">Net Profit Trend (RMB Billion)</div>
+<div class="card-chart"><canvas id="profitTrendChart"></canvas></div>
+</div>
+</div>
+</div>
+
+<div id="tab-income" class="tab-content" style="display:none">
 <div class="grid grid-2">
 <div class="card">
-<div class="title">Revenue Trend (RMB B)</div>
-<div class="chart-wrap"><canvas id="revChart"></canvas></div>
-</div>
-<div class="card">
-<div class="title">Net Profit & Adjusted Profit (RMB B)</div>
-<div class="chart-wrap"><canvas id="profitChart"></canvas></div>
-</div>
-</div>
-
-<div class="grid grid-3" style="margin-top:4px">
-<div class="card">
-<div class="title">FY2025 Revenue Mix</div>
-<div class="chart-wrap" style="height:180px"><canvas id="mixChart"></canvas></div>
-</div>
-<div class="card">
-<div class="title">Revenue by Sub-Segment (RMB B)</div>
-<div class="chart-wrap" style="height:180px"><canvas id="subSegmentChart"></canvas></div>
-</div>
-<div class="card">
-<div class="title">Gross Margin Trend</div>
-<div class="chart-wrap" style="height:180px"><canvas id="marginTrendChart"></canvas></div>
-</div>
-</div>
-
-<div class="alert info">
-<strong>FY2025 Record Results:</strong> Revenue hit RMB 457.3B (+25%), adjusted net profit RMB 39.2B (+43.8%). EV & AI segment surpassed RMB 100B for the first time (+223.8%), turning profitable (EBIT +RMB 0.9B). Smartphone × AIoT segment grew 5.4% to RMB 351.2B. R&D spending RMB 33.1B (+37.8%). 2026 delivery target: <strong>550,000 vehicles</strong>.
-</div>
-</div>
-
-<!-- TAB: FINANCIALS -->
-<div id="tab-financials" class="tab-content" style="display:none">
-<div class="grid grid-2">
-<div class="card">
-<div class="title">Income Statement (RMB M)</div>
+<div class="section-title">Income Statement Highlights</div>
 <div class="table-wrap">
 <table>
 <thead><tr><th>Metric</th><th>FY2025</th><th>FY2024</th><th>Change</th></tr></thead>
 <tbody>
-<tr><td>Total Revenue</td><td>457,287</td><td>365,906</td><td class="up">+25.0%</td></tr>
-<tr><td>Smartphone × AIoT</td><td>351,200</td><td>333,100</td><td class="up">+5.4%</td></tr>
-<tr><td>Smart EV, AI & New</td><td>106,087</td><td>32,800</td><td class="up">+223.8%</td></tr>
-<tr><td>Gross Profit</td><td>102,140</td><td>79,712</td><td class="up">+28.1%</td></tr>
-<tr><td>Gross Margin</td><td>22.3%</td><td>21.8%</td><td class="up">+50 bps</td></tr>
-<tr><td>R&D Expenses</td><td>33,100</td><td>24,100</td><td class="up">+37.8%</td></tr>
-<tr><td>Operating Income (EBIT)</td><td>35,440</td><td>—</td><td class="up">Strong</td></tr>
-<tr><td>Net Profit (GAAP)</td><td>41,600</td><td>23,600</td><td class="up">+76.3%</td></tr>
-<tr><td>Adjusted Net Profit</td><td>39,166</td><td>27,200</td><td class="up">+43.8%</td></tr>
-<tr><td>EPS (Basic, RMB)</td><td>1.62</td><td>0.95</td><td class="up">+70.5%</td></tr>
+<tr><td>Total Revenue</td><td>RMB 457.3B</td><td>RMB 365.9B</td><td class="pos">+25.0%</td></tr>
+<tr><td>Smartphone × AIoT</td><td>RMB 351.2B</td><td>RMB 333.1B</td><td class="pos">+5.4%</td></tr>
+<tr><td>Smart EV, AI &amp; New</td><td>RMB 106.1B</td><td>RMB 32.8B</td><td class="pos">+223.8%</td></tr>
+<tr><td>Gross Profit</td><td>RMB 102.1B</td><td>RMB 79.7B</td><td class="pos">+28.1%</td></tr>
+<tr><td>R&amp;D Expenses</td><td>RMB 33.1B</td><td>RMB 24.1B</td><td class="pos">+37.8%</td></tr>
+<tr><td>Operating Income (EBIT)</td><td>RMB 35.4B</td><td>—</td><td class="pos">Strong</td></tr>
+<tr><td>Net Profit (GAAP)</td><td>RMB 41.6B</td><td>RMB 23.6B</td><td class="pos">+76.3%</td></tr>
+<tr><td>Adjusted Net Profit</td><td>RMB 39.2B</td><td>RMB 27.2B</td><td class="pos">+43.8%</td></tr>
+<tr><td>EPS (Basic)</td><td>RMB 1.62</td><td>RMB 0.95</td><td class="pos">+70.5%</td></tr>
 </tbody>
 </table>
 </div>
 </div>
 <div class="card">
-<div class="title">Balance Sheet (RMB '000)</div>
-<div class="table-wrap">
-<table>
-<thead><tr><th>Item</th><th>FY2025</th><th>FY2024</th></tr></thead>
-<tbody>
-<tr><td>Total Assets</td><td>RMB 508.1B</td><td>RMB 403.2B</td></tr>
-<tr><td>Cash & Equivalents</td><td>RMB 37.8B*</td><td>—</td></tr>
-<tr><td>Inventory</td><td>RMB 74.8B</td><td>RMB 60.9B</td></tr>
-<tr><td>Total Equity</td><td>RMB 266.3B</td><td>RMB 189.2B</td></tr>
-<tr><td>Total Liabilities</td><td>RMB 241.8B</td><td>RMB 214.0B</td></tr>
-<tr><td>Current Liabilities</td><td>RMB 192.4B</td><td>RMB 175.4B</td></tr>
-<tr><td>Debt/Equity</td><td>13.3%</td><td>~15%</td></tr>
-<tr><td>ROE</td><td>~14%</td><td>~12%</td></tr>
-</tbody>
-</table>
-<p style="color:#4a4a6a;font-size:.7rem;margin-top:6px">* Cash & equivalents portion of total assets</p>
-</div>
+<div class="section-title">Revenue Mix FY2025</div>
+<div class="card-chart"><canvas id="revenueMixChart"></canvas></div>
 </div>
 </div>
 
-<div class="card" style="margin-top:4px">
-<div class="title">Quarterly Revenue Run Rate</div>
-<div class="chart-wrap" style="height:180px"><canvas id="quarterlyRevChart"></canvas></div>
+<div class="card" style="margin-top:16px">
+<div class="section-title">Revenue by Segment (RMB Billion)</div>
+<div style="height:220px"><canvas id="segmentRevChart"></canvas></div>
 </div>
 </div>
 
-<!-- TAB: EV & AI -->
-<div id="tab-ev" class="tab-content" style="display:none">
+<div id="tab-balance" class="tab-content" style="display:none">
 <div class="grid grid-2">
 <div class="card">
-<div class="title">Smart EV & AI — Key Metrics</div>
+<div class="section-title">Balance Sheet Snapshot (FY2025)</div>
 <div class="table-wrap">
 <table>
-<thead><tr><th>Metric</th><th>FY2025</th><th>FY2024</th><th>Change</th></tr></thead>
+<thead><tr><th>Item</th><th>RMB Billion</th><th>Change YoY</th></tr></thead>
 <tbody>
-<tr><td>Segment Revenue</td><td>RMB 106.1B</td><td>RMB 32.8B</td><td class="up">+223.8%</td></tr>
-<tr><td>Q4 Segment Revenue</td><td>RMB 37.2B</td><td>RMB 16.7B</td><td class="up">+123.4%</td></tr>
-<tr><td>Segment Gross Margin</td><td>22.7% (Q4)</td><td>20.4%</td><td class="up">+230 bps</td></tr>
-<tr><td>Segment EBIT</td><td class="up">+RMB 0.9B</td><td class="down">-RMB 3.0B*</td><td class="up">Breakeven!</td></tr>
-<tr><td>Vehicle Deliveries</td><td>411,082</td><td>136,854</td><td class="up">+200.4%</td></tr>
-<tr><td>Q4 Deliveries</td><td>145,115</td><td>69,697</td><td class="up">+108.2%</td></tr>
-<tr><td>ASP (Avg Selling Price)</td><td>RMB 251,000</td><td>RMB 234,000</td><td class="up">+7.3%</td></tr>
-<tr><td>Sales Centers</td><td>477 stores, 138 cities</td><td>200 stores, 58 cities</td><td class="up">Expanding</td></tr>
-<tr><td>2026 Delivery Target</td><td>550,000</td><td>—</td><td class="up">+33.8%</td></tr>
+<tr><td>Total Assets</td><td>RMB 508.1B</td><td class="pos">+26.0%</td></tr>
+<tr><td>Cash &amp; Equivalents</td><td>RMB 37.8B</td><td class="neu">—</td></tr>
+<tr><td>Inventory</td><td>RMB 74.8B</td><td class="pos">+22.8%</td></tr>
+<tr><td>Total Equity</td><td>RMB 266.3B</td><td class="pos">+40.8%</td></tr>
+<tr><td>Total Liabilities</td><td>RMB 241.8B</td><td class="pos">+13.0%</td></tr>
+<tr><td>Current Liabilities</td><td>RMB 192.4B</td><td class="pos">+9.7%</td></tr>
+<tr><td>Debt/Equity</td><td>13.3%</td><td class="pos">Improved</td></tr>
+<tr><td>Book Value / Share</td><td>~RMB 10.8</td><td class="pos">+40.8%</td></tr>
 </tbody>
 </table>
 </div>
 </div>
 <div class="card">
-<div class="title">EV Delivery Trajectory</div>
-<div class="chart-wrap"><canvas id="evDeliveryChart"></canvas></div>
+<div class="section-title">Assets Composition</div>
+<div class="card-chart"><canvas id="assetsChart"></canvas></div>
 </div>
 </div>
 
-<div class="grid grid-2" style="margin-top:4px">
+<div class="grid grid-2" style="margin-top:16px">
 <div class="card">
-<div class="title">Product Lineup</div>
-<div style="margin-top:4px">
-<div style="background:rgba(78,204,163,.06);border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid #4ecca3">
-<div style="font-weight:600;color:#4ecca3;font-size:.82rem">Xiaomi SU7 Series</div>
-<div style="color:#a0a0b8;font-size:.74rem;margin-top:3px">#1 sedan >RMB 200K in China. New-Generation SU7: 902km range, LiDAR, 700 TOPS, Xiaomi HAD. SU7 Ultra: 500K+ premium, Nürburgring record 6'22".</div>
-</div>
-<div style="background:rgba(79,195,247,.06);border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid #4fc3f7">
-<div style="font-weight:600;color:#4fc3f7;font-size:.82rem">Xiaomi YU7 Series</div>
-<div style="color:#a0a0b8;font-size:.74rem;margin-top:3px">#1 mid-to-large SUV for 7 consecutive months. Extended-range version under regulatory review — could broaden appeal.</div>
-</div>
-<div style="background:rgba(255,167,38,.06);border-radius:8px;padding:12px;border-left:3px solid #ffa726">
-<div style="font-weight:600;color:#ffa726;font-size:.82rem">First Annual Profit</div>
-<div style="color:#a0a0b8;font-size:.74rem;margin-top:3px">EV segment turned EBIT-positive (RMB 0.9B) in just 2 years since first delivery — a remarkable achievement vs peers like Rivian, Lucid.</div>
-</div>
-</div>
+<div class="section-title">Capital Structure</div>
+<div style="height:200px"><canvas id="capitalChart"></canvas></div>
 </div>
 <div class="card">
-<div class="title">Q4 2025 EV Segment Breakdown</div>
-<div class="chart-wrap"><canvas id="evQ4Chart"></canvas></div>
+<div class="section-title">Leverage &amp; Efficiency</div>
+<div style="height:200px"><canvas id="efficiencyChart"></canvas></div>
 </div>
 </div>
 </div>
 
-<!-- TAB: ECOSYSTEM -->
-<div id="tab-ecosystem" class="tab-content" style="display:none">
+<div id="tab-ratios" class="tab-content" style="display:none">
 <div class="grid grid-3">
 <div class="card">
-<div class="title">Smartphone Business</div>
-<div style="padding:4px 0">
-<div style="background:rgba(79,195,247,.06);border-radius:8px;padding:12px;border-left:3px solid #4fc3f7">
-<div style="font-weight:600;color:#4fc3f7;font-size:.82rem">Revenue: RMB 186.4B</div>
-<div style="color:#a0a0b8;font-size:.74rem;margin-top:4px">Shipments: 165.2M units<br>Global rank: Top 3 (5th consecutive year)<br>Market share: 13.3%<br>ASP: ~RMB 1,100<br>Gross margin: 10.9%</div>
+<div class="label">Gross Margin</div><div class="value">22.3%</div>
+<div class="change pos">+50 bps YoY</div>
+<div style="margin-top:10px;font-size:.8rem;color:#7a7a9a">Steady improvement from 19.8% (FY23) to 22.3% (FY25) driven by scale and higher-margin services</div>
 </div>
+<div class="card">
+<div class="label">R&amp;D / Revenue</div><div class="value">7.2%</div>
+<div class="change pos">RMB 33.1B spend</div>
+<div style="margin-top:10px;font-size:.8rem;color:#7a7a9a">Total R&D spend increased 37.8% — cumulative >RMB 105B over 5 years</div>
+</div>
+<div class="card">
+<div class="label">Adj. Net Margin</div><div class="value">8.6%</div>
+<div class="change pos">+108 bps YoY</div>
+<div style="margin-top:10px;font-size:.8rem;color:#7a7a9a">Expanding margins as higher-margin services and EV scale contribute</div>
+</div>
+</div>
+
+<div class="grid grid-2" style="margin-top:16px">
+<div class="card">
+<div class="section-title">Key Financial Ratios</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Ratio</th><th>FY2025</th><th>FY2024</th><th>Change</th></tr></thead>
+<tbody>
+<tr><td>Gross Margin</td><td>22.3%</td><td>21.8%</td><td class="pos">+50 bps</td></tr>
+<tr><td>Adj. Net Margin</td><td>8.6%</td><td>7.4%</td><td class="pos">+120 bps</td></tr>
+<tr><td>R&amp;D / Revenue</td><td>7.2%</td><td>6.6%</td><td class="pos">+60 bps</td></tr>
+<tr><td>ROE</td><td>~14.0%</td><td>~12.0%</td><td class="pos">+200 bps</td></tr>
+<tr><td>Debt/Equity</td><td>13.3%</td><td>~15.0%</td><td class="pos">-170 bps</td></tr>
+<tr><td>P/E (trailing)</td><td>~17.6x</td><td>~28.4x</td><td class="pos">Lowered</td></tr>
+<tr><td>EV / Revenue</td><td>~1.5x</td><td>—</td><td class="neu">—</td></tr>
+<tr><td>Dividend Yield</td><td>0%</td><td>0%</td><td class="neu">No dividend</td></tr>
+</tbody>
+</table>
 </div>
 </div>
 <div class="card">
-<div class="title">IoT & Lifestyle</div>
-<div style="padding:4px 0">
-<div style="background:rgba(78,204,163,.06);border-radius:8px;padding:12px;border-left:3px solid #4ecca3">
-<div style="font-weight:600;color:#4ecca3;font-size:.82rem">Revenue: RMB 123.2B</div>
-<div style="color:#a0a0b8;font-size:.74rem;margin-top:4px">Growth: +18.3% (record high)<br>Gross margin: 23.1%<br>Smart home appliances: +66.2%<br>Connected IoT devices: 1.08B<br>Overseas IoT growth outpaced domestic</div>
+<div class="section-title">Margin Trend (%)</div>
+<div style="height:220px"><canvas id="marginChart"></canvas></div>
 </div>
 </div>
+
+<div class="grid grid-2" style="margin-top:16px">
+<div class="card">
+<div class="section-title">R&amp;D Investment (RMB Billion)</div>
+<div style="height:200px"><canvas id="rdChart"></canvas></div>
 </div>
 <div class="card">
-<div class="title">Internet Services</div>
-<div style="padding:4px 0">
-<div style="background:rgba(255,167,38,.06);border-radius:8px;padding:12px;border-left:3px solid #ffa726">
-<div style="font-weight:600;color:#ffa726;font-size:.82rem">Revenue: RMB 37.4B</div>
-<div style="color:#a0a0b8;font-size:.74rem;margin-top:4px">Growth: +9.7%<br>Gross margin: 76.5% (high-margin)<br>Global MAU: 754.1M<br>Premium users growing<br>Advertising + value-added services</div>
-</div>
+<div class="section-title">User Ecosystem Growth</div>
+<div style="height:200px"><canvas id="ecosystemChart"></canvas></div>
 </div>
 </div>
 </div>
 
-<div class="grid grid-2" style="margin-top:4px">
+<div id="tab-segment" class="tab-content" style="display:none">
+<div class="grid grid-2">
 <div class="card">
-<div class="title">User Ecosystem Growth</div>
-<div style="height:180px"><canvas id="ecosystemChart"></canvas></div>
+<div class="section-title">Segment Revenue Breakdown</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Segment</th><th>Revenue (RMB B)</th><th>YoY Growth</th></tr></thead>
+<tbody>
+<tr><td><strong>Smartphones</strong></td><td>RMB 186.4B</td><td class="pos">+3.0%</td></tr>
+<tr><td><strong>IoT &amp; Lifestyle</strong></td><td>RMB 123.2B</td><td class="pos">+18.3%</td></tr>
+<tr><td><strong>Internet Services</strong></td><td>RMB 37.4B</td><td class="pos">+9.7%</td></tr>
+<tr><td><strong>Smart EV, AI &amp; New</strong></td><td>RMB 106.1B</td><td class="pos">+223.8%</td></tr>
+<tr><td><strong>Others / Adjustments</strong></td><td>RMB 4.2B</td><td class="neu">—</td></tr>
+</tbody>
+</table>
+<p style="color:#7a7a9a;font-size:.75rem;margin-top:8px">Smartphone × AIoT total: RMB 351.2B (smartphones + IoT + internet)</p>
+</div>
 </div>
 <div class="card">
-<div class="title">R&D Investment (RMB B)</div>
-<div style="height:180px"><canvas id="rdChart"></canvas></div>
+<div class="section-title">Revenue Share by Segment</div>
+<div class="card-chart"><canvas id="segmentShareChart"></canvas></div>
 </div>
 </div>
 
-<div class="card" style="margin-top:4px">
-<div class="title">Retail & Global Presence</div>
-<div class="grid grid-2" style="gap:10px;margin-top:4px">
-<div style="background:rgba(255,107,53,.04);border-radius:8px;padding:12px;border:1px solid rgba(255,107,53,.08)">
-<div style="font-weight:600;color:#ff6b35;font-size:.8rem">Mainland China Retail</div>
-<div style="color:#a0a0b8;font-size:.74rem;margin-top:4px">~18,000 Mi Home stores (+3,000 net new in FY25)<br>477 EV sales centers across 138 cities<br>New retail strategy driving online-to-offline integration</div>
+<div class="grid grid-2" style="margin-top:16px">
+<div class="card">
+<div class="section-title">Key Growth Drivers</div>
+<div style="margin-top:8px">
+<div style="background:rgba(78,204,163,.08);border-radius:10px;padding:14px;margin-bottom:10px;border-left:3px solid #4ecca3">
+<div style="font-weight:600;color:#4ecca3;font-size:.85rem">Smartphone — Global #3</div>
+<div style="color:#b0b0c8;font-size:.82rem;margin-top:4px">165.2M shipments, 13.3% share. Premium push via 14-series, ASP ~RMB 1,100. Top 3 globally for 5 consecutive years.</div>
 </div>
-<div style="background:rgba(78,204,163,.04);border-radius:8px;padding:12px;border:1px solid rgba(78,204,163,.08)">
-<div style="font-weight:600;color:#4ecca3;font-size:.8rem">Global Expansion</div>
-<div style="color:#a0a0b8;font-size:.74rem;margin-top:4px">IoT overseas growth outpacing domestic<br>Expanding Mi Stores globally (Europe, Poland)<br>Top 3 smartphone globally 13.3% share<br>754M MAU across 100+ countries</div>
+<div style="background:rgba(138,180,248,.08);border-radius:10px;padding:14px;margin-bottom:10px;border-left:3px solid #8ab4f8">
+<div style="font-weight:600;color:#8ab4f8;font-size:.85rem">IoT &amp; Lifestyle — Record High</div>
+<div style="color:#b0b0c8;font-size:.82rem;margin-top:4px">RMB 123.2B (+18.3%). Smart home appliances +66.2%. 1.08B connected IoT devices. Overseas IoT outpacing domestic.</div>
 </div>
+<div style="background:rgba(233,69,96,.08);border-radius:10px;padding:14px;margin-bottom:10px;border-left:3px solid #e94560">
+<div style="font-weight:600;color:#e94560;font-size:.85rem">Smart EV — Profitability Inflection</div>
+<div style="color:#b0b0c8;font-size:.82rem;margin-top:4px">RMB 106.1B revenue (+223.8%). EBIT +RMB 0.9B (profitable). 411K deliveries (+200%). 477 stores, 138 cities. 2026 target: 550K.</div>
+</div>
+<div style="background:rgba(15,52,96,.4);border-radius:10px;padding:14px;border-left:3px solid #0f3460">
+<div style="font-weight:600;color:#8ab4f8;font-size:.85rem">Internet Services — High Margin</div>
+<div style="color:#b0b0c8;font-size:.82rem;margin-top:4px">RMB 37.4B (+9.7%), 76.5% gross margin. 754M global MAU (+7.4%). Premium users and advertising driving growth.</div>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="section-title">EV Delivery Trajectory</div>
+<div style="height:220px"><canvas id="evDeliveryChart"></canvas></div>
 </div>
 </div>
 </div>
 
-<div class="verdict">
-<h3>Investment Summary</h3>
+<div class="verdict" style="margin-top:20px">
+<h3>Analysis Summary</h3>
 <p>
-<strong style="color:#ff6b35">Xiaomi (1810.HK)</strong> — Successfully transitioning from smartphone maker to "Human × Car × Home" tech ecosystem. FY2025 was a landmark year: record revenue (RMB 457.3B, +25%), record adjusted profit (RMB 39.2B, +43.8%), and the EV & AI segment crossing RMB 100B while turning profitable for the first time (EBIT +RMB 0.9B). Smartphone business remains solid (#3 globally, 13.3% share), IoT is hitting records (+18.3%), and the EV business delivered 411K vehicles (+200%) with a 550K target for 2026.
+<strong style="color:#4ecca3">Strengths:</strong> 
+<span class="tag green">Revenue +25%</span>
+<span class="tag green">Adj. Profit +43.8%</span>
+<span class="tag green">EV Profitable</span>
+<span class="tag green">R&amp;D 7.2%</span>
+<span class="tag green">IoT Record</span>
+<span class="tag green">754M MAU</span>
 <br><br>
-<strong style="color:#ff6b35">Key Catalysts:</strong> EV profitability inflection, SU7 Ultra premium validation (~RMB 500K+), YU7 SUV dominance, 550K delivery target, global IoT expansion, R&D (RMB 105.5B cumulative, targeting RMB 200B in 5 years).
+Xiaomi delivered a landmark FY2025 with record revenue of RMB 457.3B (+25%) and record adjusted net profit of RMB 39.2B (+43.8%). The EV &amp; AI segment crossed RMB 100B in revenue for the first time (+223.8%) and achieved its first annual EBIT profit (+RMB 0.9B), a remarkable milestone just two years after first delivery. Smartphone remained solid at #3 globally (13.3% share), IoT hit records (+18.3%), and internet services maintained high margins at 76.5%. R&amp;D spending accelerated to RMB 33.1B (+37.8%), targeting >RMB 200B over 5 years. The "Human × Car × Home" ecosystem is now fully operational.
 <br><br>
-<strong style="color:#ef5350">Risks:</strong> Q1 2026 profit decline (net income -43-57% YoY due to memory costs + EV ramp), smartphone ASP pressure, memory chip cost inflation, EV investment burn rate, stock -55% from 52-week high (HK$59.90 to HK$26.88), no dividend, intense competition in both smartphone (Apple, Samsung) and EV (BYD, Tesla, Nio) markets.
+<span style="color:#e94560"><strong>Risks:</strong></span>
+<span class="tag red">Q1 Profit Warning</span>
+<span class="tag red">Stock -55% from High</span>
+<span class="tag red">Memory Cost Inflation</span>
+<span class="tag red">EV Competition</span>
+<span class="tag red">No Dividend</span>
+<br>
+Q1 2026 net profit expected -43% to -57% YoY due to memory costs and EV ramp investment. Stock trades at HK$26.88, down 55% from 52-week high of HK$59.90. Intense competition in both smartphone (Apple, Samsung) and EV (BYD, Tesla, Nio) markets. No dividend — all capital reinvested into growth.
 </p>
 </div>
 
-<footer>Data sourced from Xiaomi FY2025 Annual Report (Mar 2026), HKEX filings, Omdia, CnEVPost. For informational purposes only.</footer>
+<footer style="text-align:center;padding:30px 0 10px;color:#5a5a7a;font-size:.8rem">
+Data sourced from Xiaomi FY2025 Annual Report (Mar 2026) &amp; HKEX filings &middot; For informational purposes only
+</footer>
+
 </div>
 
 <script>
-document.querySelectorAll('.tab-btn').forEach(b=>{
-b.addEventListener('click',function(){
-document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
+document.querySelectorAll('.tab-btn').forEach(btn => {
+btn.addEventListener('click', function(){
+document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
 this.classList.add('active');
 document.querySelectorAll('.tab-content').forEach(c=>c.style.display='none');
 document.getElementById('tab-'+this.dataset.tab).style.display='block';
-})});
+});
+});
 
-const cf={color:'#5a5a7a',borderColor:'rgba(255,255,255,.03)',
-plugins:{legend:{labels:{color:'#a0a0b8',font:{size:9},boxWidth:10}}},
-scales:{x:{ticks:{color:'#5a5a7a',font:{size:8}},grid:{color:'rgba(255,255,255,.02)'}},
-y:{ticks:{color:'#5a5a7a',font:{size:8}},grid:{color:'rgba(255,255,255,.02)'}}}};
+const chartDefaults = {
+color:'#7a7a9a', borderColor:'rgba(255,255,255,.08)',
+plugins:{legend:{labels:{color:'#a0a0b8',font:{size:11}}}},
+scales:{x:{ticks:{color:'#7a7a9a',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},
+y:{ticks:{color:'#7a7a9a',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}}}
+};
 
-new Chart(document.getElementById('revChart'),{type:'bar',data:{
+new Chart(document.getElementById('revTrendChart'),{type:'bar',data:{
 labels:['FY2021','FY2022','FY2023','FY2024','FY2025'],
 datasets:[
-{label:'Smartphone × AIoT',data:[270.6,257.4,256.9,333.1,351.2],backgroundColor:'rgba(79,195,247,.7)',borderRadius:4},
-{label:'EV, AI & New Initiatives',data:[0,0,0,32.8,106.1],backgroundColor:'rgba(255,107,53,.7)',borderRadius:4}
+{label:'Smartphone × AIoT',data:[270.6,257.4,256.9,333.1,351.2],
+backgroundColor:'rgba(138,180,248,.7)',borderRadius:4},
+{label:'EV, AI & New',data:[0,0,0,32.8,106.1],
+backgroundColor:'rgba(233,69,96,.7)',borderRadius:4}
 ]},
-options:{...cf,responsive:true,maintainAspectRatio:false,
-plugins:{...cf.plugins,legend:{position:'top'}},
-scales:{...cf.scales,x:{stacked:true},y:{...cf.scales.y,stacked:true,beginAtZero:true}}}});
+options:{...chartDefaults,responsive:true,maintainAspectRatio:false,
+plugins:{...chartDefaults.plugins,legend:{position:'top'}},
+scales:{...chartDefaults.scales,x:{stacked:true},y:{...chartDefaults.scales.y,stacked:true,beginAtZero:true}}}});
 
-new Chart(document.getElementById('profitChart'),{type:'bar',data:{
+new Chart(document.getElementById('profitTrendChart'),{type:'bar',data:{
 labels:['FY2021','FY2022','FY2023','FY2024','FY2025'],
-datasets:[
-{label:'Net Profit (GAAP)',data:[19.3,2.5,17.5,23.6,41.6],backgroundColor:'rgba(78,204,163,.7)',borderRadius:4},
-{label:'Adj. Net Profit',data:[22.0,8.5,19.3,27.2,39.2],backgroundColor:'rgba(255,167,38,.7)',borderRadius:4}
-]},
-options:{...cf,responsive:true,maintainAspectRatio:false,
-plugins:{...cf.plugins,legend:{position:'top'}},
-scales:{...cf.scales,y:{...cf.scales.y,beginAtZero:true}}}});
+datasets:[{
+label:'Net Profit (GAAP) (RMB B)',
+data:[19.3,2.5,17.5,23.6,41.6],
+backgroundColor:['rgba(78,204,163,.5)','rgba(78,204,163,.5)','rgba(78,204,163,.6)','rgba(78,204,163,.8)','rgba(78,204,163,1)'],
+borderColor:'#4ecca3',borderWidth:1,borderRadius:4
+}]
+},options:{...chartDefaults,plugins:{...chartDefaults.plugins,legend:{display:false}},
+scales:{...chartDefaults.scales,y:{...chartDefaults.scales.y,beginAtZero:true}}}});
 
-new Chart(document.getElementById('mixChart'),{type:'doughnut',data:{
-labels:['Smartphones','IoT & Lifestyle','Internet Services','EV, AI & New Initiatives'],
-datasets:[{data:[40.8,26.9,8.2,23.2],
-backgroundColor:['#4fc3f7','#4ecca3','#ffa726','#ff6b35'],
-borderColor:'#07070f',borderWidth:2}]
-},options:{...cf,cutout:'60%',responsive:true,maintainAspectRatio:false,
-plugins:{...cf.plugins,legend:{position:'bottom',labels:{...cf.plugins.legend.labels,font:{size:8}}}}}});
-
-new Chart(document.getElementById('subSegmentChart'),{type:'bar',data:{
+new Chart(document.getElementById('revenueMixChart'),{type:'doughnut',data:{
 labels:['Smartphones','IoT & Lifestyle','Internet Services','EV, AI & New'],
-datasets:[{label:'FY2025 (RMB B)',data:[186.4,123.2,37.4,106.1],
-backgroundColor:['#4fc3f7','#4ecca3','#ffa726','#ff6b35'],
-borderRadius:4}]
-},options:{...cf,responsive:true,maintainAspectRatio:false,
-plugins:{...cf.plugins,legend:{display:false}},
-scales:{...cf.scales,y:{...cf.scales.y,beginAtZero:true}}}});
+datasets:[{
+data:[40.8,26.9,8.2,23.2],
+backgroundColor:['#4ecca3','#8ab4f8','#ffd166','#e94560'],
+borderColor:'#1a1a2e',borderWidth:2
+}]
+},options:{...chartDefaults,cutout:'65%',
+plugins:{...chartDefaults.plugins,legend:{position:'bottom',labels:{...chartDefaults.plugins.legend.labels,font:{size:10}}}}}});
 
-new Chart(document.getElementById('marginTrendChart'),{type:'line',data:{
-labels:['FY2021','FY2022','FY2023','FY2024','FY2025'],
-datasets:[{label:'Gross Margin %',data:[17.7,17.0,19.8,21.8,22.3],
-borderColor:'#ff6b35',backgroundColor:'rgba(255,107,53,.1)',
-fill:true,tension:.3,pointBackgroundColor:'#ff6b35',pointRadius:4}]
-},options:{...cf,responsive:true,maintainAspectRatio:false,
-plugins:{...cf.plugins,legend:{display:false}},
-scales:{...cf.scales,y:{...cf.scales.y,beginAtZero:true,min:15,max:25}}}});
+new Chart(document.getElementById('segmentRevChart'),{type:'bar',data:{
+labels:['Smartphones','IoT & Lifestyle','Internet Services','EV, AI & New'],
+datasets:[{
+label:'FY2025 (RMB B)',
+data:[186.4,123.2,37.4,106.1],
+backgroundColor:['rgba(78,204,163,.7)','rgba(138,180,248,.7)','rgba(255,209,102,.7)','rgba(233,69,96,.7)'],
+borderRadius:4
+}]
+},options:{...chartDefaults,plugins:{...chartDefaults.plugins,legend:{display:false}},
+scales:{...chartDefaults.scales,y:{...chartDefaults.scales.y,beginAtZero:true}}}});
 
-new Chart(document.getElementById('quarterlyRevChart'),{type:'bar',data:{
-labels:['Q1','Q2','Q3','Q4'],
+new Chart(document.getElementById('assetsChart'),{type:'doughnut',data:{
+labels:['Inventory','Cash & Equivalents','Other Current','Non-Current'],
+datasets:[{
+data:[74.8,37.8,200.5,195],
+backgroundColor:['#4ecca3','#8ab4f8','#ffd166','#e94560'],
+borderColor:'#1a1a2e',borderWidth:2
+}]
+},options:{...chartDefaults,cutout:'60%',
+plugins:{...chartDefaults.plugins,legend:{position:'right',labels:{...chartDefaults.plugins.legend.labels,font:{size:10}}}}}});
+
+new Chart(document.getElementById('capitalChart'),{type:'bar',data:{
+labels:['Total Equity','Total Liabilities','Total Assets'],
 datasets:[
-{label:'Smartphone × AIoT',data:[82.9,81.0,78.4,108.9],backgroundColor:'rgba(79,195,247,.7)',borderRadius:4},
-{label:'EV, AI & New',data:[18.6,21.3,27.3,37.2],backgroundColor:'rgba(255,107,53,.7)',borderRadius:4}
-]},
-options:{...cf,responsive:true,maintainAspectRatio:false,
-plugins:{...cf.plugins,legend:{position:'top'}},
-scales:{...cf.scales,x:{stacked:true},y:{...cf.scales.y,stacked:true,beginAtZero:true}}}});
+{label:'FY2024',data:[189.2,214.0,403.2],backgroundColor:'rgba(138,180,248,.4)',borderRadius:4},
+{label:'FY2025',data:[266.3,241.8,508.1],backgroundColor:'rgba(78,204,163,.7)',borderRadius:4}
+]
+},options:{...chartDefaults,plugins:{...chartDefaults.plugins,legend:{position:'top',labels:{...chartDefaults.plugins.legend.labels,font:{size:10}}}},
+scales:{...chartDefaults.scales,y:{...chartDefaults.scales.y,beginAtZero:true}}}});
 
-new Chart(document.getElementById('evDeliveryChart'),{type:'bar',data:{
-labels:['Q1 FY24','Q2 FY24','Q3 FY24','Q4 FY24','Q1 FY25','Q2 FY25','Q3 FY25','Q4 FY25'],
-datasets:[{label:'EV Deliveries',data:[0,0,39,69.7,75.9,95.7,94.4,145.1],
-backgroundColor:'rgba(255,107,53,.7)',borderRadius:4}]
-},options:{...cf,responsive:true,maintainAspectRatio:false,
-plugins:{...cf.plugins,legend:{display:false}},
-scales:{...cf.scales,y:{...cf.scales.y,beginAtZero:true}}}});
+new Chart(document.getElementById('efficiencyChart'),{type:'line',data:{
+labels:['FY2021','FY2022','FY2023','FY2024','FY2025'],
+datasets:[
+{label:'Debt/Equity (%)',data:[25,22,18,15,13.3],borderColor:'#e94560',backgroundColor:'rgba(233,69,96,.1)',fill:true,tension:.3,pointRadius:4},
+{label:'Gross Margin (%)',data:[17.7,17.0,19.8,21.8,22.3],borderColor:'#4ecca3',backgroundColor:'rgba(78,204,163,.1)',fill:true,tension:.3,pointRadius:4}
+]
+},options:{...chartDefaults,
+scales:{...chartDefaults.scales,y:{...chartDefaults.scales.y,beginAtZero:true}},
+plugins:{...chartDefaults.plugins,legend:{position:'top',labels:{...chartDefaults.plugins.legend.labels,font:{size:10}}}}}});
 
-new Chart(document.getElementById('evQ4Chart'),{type:'doughnut',data:{
-labels:['Smart EV Revenue','AI & Other Related'],
-datasets:[{data:[36.3,1.0],
-backgroundColor:['#ff6b35','#ffa726'],
-borderColor:'#07070f',borderWidth:2}]
-},options:{...cf,cutout:'60%',responsive:true,maintainAspectRatio:false,
-plugins:{...cf.plugins,legend:{position:'bottom',labels:{...cf.plugins.legend.labels,font:{size:8}}}}}});
+new Chart(document.getElementById('marginChart'),{type:'line',data:{
+labels:['FY2021','FY2022','FY2023','FY2024','FY2025'],
+datasets:[
+{label:'Gross Margin',data:[17.7,17.0,19.8,21.8,22.3],borderColor:'#4ecca3',backgroundColor:'rgba(78,204,163,.1)',fill:true,tension:.3,pointRadius:4},
+{label:'Adj. Net Margin',data:[4.8,3.3,7.5,7.4,8.6],borderColor:'#8ab4f8',backgroundColor:'rgba(138,180,248,.1)',fill:true,tension:.3,pointRadius:4}
+]
+},options:{...chartDefaults,
+scales:{...chartDefaults.scales,y:{...chartDefaults.scales.y,beginAtZero:true,min:0,max:25}},
+plugins:{...chartDefaults.plugins,legend:{position:'top',labels:{...chartDefaults.plugins.legend.labels,font:{size:10}}}}}});
+
+new Chart(document.getElementById('rdChart'),{type:'bar',data:{
+labels:['FY2021','FY2022','FY2023','FY2024','FY2025'],
+datasets:[{
+label:'R&D (RMB B)',
+data:[13.2,16.0,19.1,24.1,33.1],
+backgroundColor:['rgba(138,180,248,.5)','rgba(138,180,248,.5)','rgba(138,180,248,.6)','rgba(138,180,248,.8)','rgba(138,180,248,1)'],
+borderRadius:4
+}]
+},options:{...chartDefaults,plugins:{...chartDefaults.plugins,legend:{display:false}},
+scales:{...chartDefaults.scales,y:{...chartDefaults.scales.y,beginAtZero:true}}}});
 
 new Chart(document.getElementById('ecosystemChart'),{type:'line',data:{
 labels:['FY2021','FY2022','FY2023','FY2024','FY2025'],
 datasets:[
-{label:'Global MAU (M)',data:[511,580,641,702,754],borderColor:'#4fc3f7',tension:.3,pointRadius:3},
-{label:'IoT Devices (M)',data:[434,584,740,905,1079],borderColor:'#4ecca3',tension:.3,pointRadius:3}
-]},
-options:{...cf,responsive:true,maintainAspectRatio:false,
-plugins:{...cf.plugins,legend:{position:'top'}},
-scales:{...cf.scales,y:{...cf.scales.y,beginAtZero:true}}}});
+{label:'Global MAU (M)',data:[511,580,641,702,754],borderColor:'#4ecca3',tension:.3,pointRadius:4},
+{label:'IoT Devices (M)',data:[434,584,740,905,1079],borderColor:'#8ab4f8',tension:.3,pointRadius:4}
+]
+},options:{...chartDefaults,
+scales:{...chartDefaults.scales,y:{...chartDefaults.scales.y,beginAtZero:true}},
+plugins:{...chartDefaults.plugins,legend:{position:'top',labels:{...chartDefaults.plugins.legend.labels,font:{size:10}}}}}});
 
-new Chart(document.getElementById('rdChart'),{type:'bar',data:{
-labels:['FY2021','FY2022','FY2023','FY2024','FY2025'],
-datasets:[{label:'R&D (RMB B)',data:[13.2,16.0,19.1,24.1,33.1],
-backgroundColor:'rgba(255,107,53,.7)',borderRadius:4}]
-},options:{...cf,responsive:true,maintainAspectRatio:false,
-plugins:{...cf.plugins,legend:{display:false}},
-scales:{...cf.scales,y:{...cf.scales.y,beginAtZero:true}}}});
+new Chart(document.getElementById('segmentShareChart'),{type:'doughnut',data:{
+labels:['Smartphones','IoT & Lifestyle','Internet Services','EV, AI & New'],
+datasets:[{
+data:[40.8,26.9,8.2,23.2],
+backgroundColor:['#4ecca3','#8ab4f8','#ffd166','#e94560'],
+borderColor:'#1a1a2e',borderWidth:2
+}]
+},options:{...chartDefaults,cutout:'60%',
+plugins:{...chartDefaults.plugins,legend:{position:'right',labels:{...chartDefaults.plugins.legend.labels,font:{size:10}}}}}});
+
+new Chart(document.getElementById('evDeliveryChart'),{type:'bar',data:{
+labels:['Q1 FY24','Q2 FY24','Q3 FY24','Q4 FY24','Q1 FY25','Q2 FY25','Q3 FY25','Q4 FY25'],
+datasets:[{
+label:'Deliveries',
+data:[0,0,39,69.7,75.9,95.7,94.4,145.1],
+backgroundColor:['rgba(233,69,96,.4)','rgba(233,69,96,.4)','rgba(233,69,96,.5)','rgba(233,69,96,.6)','rgba(233,69,96,.7)','rgba(233,69,96,.8)','rgba(233,69,96,.8)','rgba(233,69,96,1)'],
+borderRadius:4
+}]
+},options:{...chartDefaults,plugins:{...chartDefaults.plugins,legend:{display:false}},
+scales:{...chartDefaults.scales,y:{...chartDefaults.scales.y,beginAtZero:true}}}});
 </script>
+
 </body>
 </html>
