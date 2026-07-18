@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PetroChina (0857.HK) vs CNOOC (0883.HK) — HK Oil & Gas Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
+body{background:#07070f;color:#e0e0e0;padding:16px}
+.container{max-width:1500px;margin:0 auto}
+
+.header{background:linear-gradient(135deg,#0a0a1a,#1a1a2e 50%,#0d1b2a 100%);border-radius:16px;padding:24px 32px;margin-bottom:20px;border:1px solid rgba(255,255,255,.06)}
+.header h1{font-size:1.6rem;font-weight:700;color:#fff}
+.header .sub{color:#6a6a8a;font-size:.82rem;margin-top:4px}
+
+.stock-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.stock-card{background:linear-gradient(145deg,#101028,#0c0c20);border-radius:14px;padding:20px 24px;border:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden}
+.stock-card::before{position:absolute;right:16px;top:12px;font-size:3.5rem;font-weight:900;opacity:.04;color:#fff}
+.stock-card.petro::before{content:'0857';color:#4fc3f7}
+.stock-card.cnooc::before{content:'0883';color:#ffa726}
+.stock-card .tk{font-size:1.8rem;font-weight:700;color:#fff}
+.stock-card .tk .exch{font-size:.75rem;font-weight:400;color:#5a5a7a}
+.stock-card .name{color:#7a7a9a;font-size:.85rem;margin:2px 0 8px}
+.stock-card .price{font-size:2rem;font-weight:700}
+.stock-card .price-row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.stock-card .change{padding:2px 10px;border-radius:6px;font-size:.9rem;font-weight:600}
+.stock-card .change.up{background:rgba(78,204,163,.12);color:#4ecca3}
+.stock-card .change.down{background:rgba(239,83,80,.12);color:#ef5350}
+.stock-card .meta{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap;font-size:.78rem;color:#6a6a8a}
+.stock-card .meta b{color:#c0c0d0;font-weight:600}
+
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.stat-box{background:rgba(255,255,255,.02);border-radius:10px;padding:14px 16px;border:1px solid rgba(255,255,255,.04)}
+.stat-box .lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.3px;color:#5a5a7a;margin-bottom:2px}
+.stat-box .val{font-size:1.1rem;font-weight:700;color:#fff}
+.stat-box .sub{font-size:.7rem;color:#6a6a8a;margin-top:1px}
+.stat-box .val.gold{color:#ffd166}
+.stat-box .val.blue{color:#4fc3f7}
+.stat-box .val.green{color:#4ecca3}
+.stat-box .val.red{color:#ef5350}
+.stat-box .val.orange{color:#ffa726}
+
+.tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.tab-btn{padding:9px 18px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#7a7a9a;cursor:pointer;font-size:.82rem;font-weight:500;transition:.2s}
+.tab-btn:hover{background:rgba(255,255,255,.06);color:#e0e0e0}
+.tab-btn.active{background:#ffa726;color:#07070f;border-color:#ffa726;font-weight:700}
+
+.grid{display:grid;gap:14px;margin-bottom:16px}
+.grid-2{grid-template-columns:1fr 1fr}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+
+.card{background:linear-gradient(145deg,#101028,#0c0c20);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,.05)}
+.card .title{font-size:.85rem;font-weight:600;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.card .title .icon{font-size:1rem}
+.chart-wrap{height:230px;position:relative}
+.table-wrap{overflow-x:auto;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:.78rem}
+th{text-align:left;padding:7px 8px;color:#5a5a7a;font-weight:600;font-size:.65rem;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid rgba(255,255,255,.05)}
+td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.02);color:#b0b0c8}
+tr:hover td{background:rgba(255,255,255,.015)}
+td.up{color:#4ecca3}
+td.down{color:#ef5350}
+td.center{text-align:center}
+.company-tag{display:inline-block;padding:1px 8px;border-radius:4px;font-size:.65rem;font-weight:600}
+.company-tag.p{background:rgba(79,195,247,.12);color:#4fc3f7}
+.company-tag.c{background:rgba(255,167,38,.12);color:#ffa726}
+
+.compare-row{display:flex;gap:12px;margin-bottom:6px;align-items:center}
+.compare-bar{flex:1;height:18px;border-radius:4px;position:relative;overflow:hidden;background:rgba(255,255,255,.04)}
+.compare-bar .fill{height:100%;border-radius:4px;transition:width .3s}
+.compare-bar .fill.p{background:linear-gradient(90deg,#4fc3f7,#29b6f6)}
+.compare-bar .fill.c{background:linear-gradient(90deg,#ffa726,#ff8f00)}
+.compare-label{width:60px;font-size:.72rem;color:#7a7a9a;text-align:right}
+.compare-val{width:60px;font-size:.78rem;font-weight:600;color:#fff;text-align:right}
+
+.alert{background:rgba(255,167,38,.04);border:1px solid rgba(255,167,38,.1);border-radius:10px;padding:14px 18px;font-size:.78rem;color:#b0b0c8;line-height:1.5}
+.alert strong{color:#ffa726}
+
+.verdict{background:linear-gradient(135deg,rgba(78,204,163,.04),rgba(78,204,163,.01));border:1px solid rgba(78,204,163,.12);border-radius:12px;padding:20px;margin-top:14px}
+.verdict h3{color:#4ecca3;font-size:.95rem;margin-bottom:6px}
+.verdict p{color:#a0a0b8;font-size:.8rem;line-height:1.6}
+
+footer{text-align:center;padding:24px 0 8px;color:#3a3a5a;font-size:.7rem}
+
+@media(max-width:1000px){
+.stock-row{grid-template-columns:1fr}
+.stats-grid{grid-template-columns:repeat(2,1fr)}
+.grid-2,.grid-3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+<h1>HK Oil & Gas <span style="color:#ffa726;">Majors</span> Dashboard</h1>
+<div class="sub">Side-by-side financial comparison  |  FY2025 (Year Ended Dec 31, 2025)  |  Brent crude ~US$68.2/bbl (-15% YoY)</div>
+</div>
+
+<div class="stock-row">
+<div class="stock-card petro">
+<div class="tk">0857.HK <span class="exch">HKEX</span></div>
+<div class="name">PetroChina Company Limited <span style="color:#5a5a7a;font-size:.7rem">中国石油</span></div>
+<div class="price-row">
+<span class="price" style="color:#4fc3f7">HK$9.47</span>
+<span class="change down">-0.73%</span>
+<span style="font-size:.8rem;color:#6a6a8a">Mkt Cap: HK$2.50T</span>
+</div>
+<div class="meta">
+<span><b>P/E:</b> 9.18x</span>
+<span><b>P/B:</b> 0.89x</span>
+<span><b>Div Yield:</b> 6.26%</span>
+<span><b>52W Range:</b> 6.50 – 12.22</span>
+<span><b>Analyst Target:</b> HK$12.17</span>
+</div>
+</div>
+<div class="stock-card cnooc">
+<div class="tk">0883.HK <span class="exch">HKEX</span></div>
+<div class="name">CNOOC Limited <span style="color:#5a5a7a;font-size:.7rem">中国海油</span></div>
+<div class="price-row">
+<span class="price" style="color:#ffa726">HK$25.14</span>
+<span class="change up">+3.71%</span>
+<span style="font-size:.8rem;color:#6a6a8a">Mkt Cap: HK$1.08T</span>
+</div>
+<div class="meta">
+<span><b>P/E:</b> ~8.5x</span>
+<span><b>P/B:</b> ~1.2x</span>
+<span><b>Div Yield:</b> 5.1%</span>
+<span><b>2026 Production Target:</b> 780-800M boe</span>
+<span><b>All-in Cost:</b> US$27.90/boe</span>
+</div>
+</div>
+</div>
+
+<div class="stats-grid">
+<div class="stat-box"><div class="lbl">Brent Crude (2025 Avg)</div><div class="val gold">$68.20</div><div class="sub">-14.6% YoY</div></div>
+<div class="stat-box"><div class="lbl">China GDP Growth</div><div class="val green">5.0%</div><div class="sub">2025</div></div>
+<div class="stat-box"><div class="lbl">Global GDP Growth</div><div class="val blue">3.3%</div><div class="sub">2025</div></div>
+<div class="stat-box"><div class="lbl">HK Energy Sector</div><div class="val orange">Defensive</div><div class="sub">High dividend, low beta</div></div>
+</div>
+
+<div class="tabs">
+<button class="tab-btn active" data-tab="compare">Comparison</button>
+<button class="tab-btn" data-tab="petro">PetroChina</button>
+<button class="tab-btn" data-tab="cnooc">CNOOC</button>
+</div>
+
+<!-- TAB: COMPARISON -->
+<div id="tab-compare" class="tab-content active">
+<div class="grid grid-2">
+<div class="card">
+<div class="title"><span class="icon">📊</span> Revenue Comparison (RMB B)</div>
+<div class="chart-wrap"><canvas id="revCompareChart"></canvas></div>
+</div>
+<div class="card">
+<div class="title"><span class="icon">💰</span> Net Profit Comparison (RMB B)</div>
+<div class="chart-wrap"><canvas id="profitCompareChart"></canvas></div>
+</div>
+</div>
+
+<div class="card">
+<div class="title"><span class="icon">⚖️</span> Head-to-Head Comparison</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Metric</th><th class="center"><span class="company-tag p">0857.HK</span> PetroChina</th><th class="center"><span class="company-tag c">0883.HK</span> CNOOC</th><th class="center">Edge</th></tr></thead>
+<tbody>
+<tr><td>Revenue (FY2025)</td><td class="center">RMB 2,864B</td><td class="center">RMB 398B</td><td class="center up">PetroChina 7.2x larger</td></tr>
+<tr><td>Revenue Growth</td><td class="center down">-2.50%</td><td class="center down">-5.30%</td><td class="center up">PetroChina</td></tr>
+<tr><td>Net Profit</td><td class="center">RMB 157.3B</td><td class="center">RMB 122.1B</td><td class="center up">PetroChina +29%</td></tr>
+<tr><td>Net Profit Growth</td><td class="center down">-4.5%</td><td class="center down">-11.5%</td><td class="center up">PetroChina</td></tr>
+<tr><td>Net Profit Margin</td><td class="center">5.5%</td><td class="center up">30.7%</td><td class="center up">CNOOC (upstream pure-play)</td></tr>
+<tr><td>P/E (Trailing)</td><td class="center">9.18x</td><td class="center">~8.5x</td><td class="center up">CNOOC cheaper</td></tr>
+<tr><td>P/B</td><td class="center">0.89x</td><td class="center">~1.2x</td><td class="center up">PetroChina (undervalued)</td></tr>
+<tr><td>EV/EBITDA</td><td class="center">7.69x</td><td class="center">~5.5x</td><td class="center up">CNOOC</td></tr>
+<tr><td>Dividend Yield</td><td class="center up">6.26%</td><td class="center">~5.1%</td><td class="center up">PetroChina</td></tr>
+<tr><td>Oil & Gas Production</td><td class="center">1,841.9M boe</td><td class="center">777M boe</td><td class="center up">PetroChina 2.4x</td></tr>
+<tr><td>Production Growth</td><td class="center up">+2.5%</td><td class="center up">+7.4%</td><td class="center up">CNOOC faster growth</td></tr>
+<tr><td>All-in Cost (US$/boe)</td><td class="center">~$40*</td><td class="center up">$27.90</td><td class="center up">CNOOC lower cost</td></tr>
+<tr><td>ROE</td><td class="center">9.6%</td><td class="center up">~19%</td><td class="center up">CNOOC (2x better)</td></tr>
+<tr><td>Debt/Equity</td><td class="center up">24.1%</td><td class="center">~30%*</td><td class="center up">PetroChina</td></tr>
+<tr><td>Free Cash Flow</td><td class="center">RMB 120.2B</td><td class="center">RMB 132.5B</td><td class="center up">CNOOC</td></tr>
+<tr><td>Payout Ratio</td><td class="center">~52%</td><td class="center">45%</td><td class="center up">PetroChina</td></tr>
+<tr><td>Employees</td><td class="center">367,173</td><td class="center">~22,000</td><td class="center up">CNOOC leaner</td></tr>
+</tbody>
+</table>
+<p style="color:#4a4a6a;font-size:.7rem;margin-top:6px">* Estimated. PetroChina is integrated (upstream + downstream); CNOOC is upstream pure-play.</p>
+</div>
+</div>
+
+<div class="grid grid-3" style="margin-top:4px">
+<div class="card">
+<div class="title">Revenue Trend</div>
+<div class="chart-wrap" style="height:180px"><canvas id="revTrendMini"></canvas></div>
+</div>
+<div class="card">
+<div class="title">Net Margin Comparison</div>
+<div class="chart-wrap" style="height:180px"><canvas id="marginChart"></canvas></div>
+</div>
+<div class="card">
+<div class="title">Valuation (P/E)</div>
+<div class="chart-wrap" style="height:180px"><canvas id="peChart"></canvas></div>
+</div>
+</div>
+</div>
+
+<!-- TAB: PETROCHINA -->
+<div id="tab-petro" class="tab-content" style="display:none">
+<div class="grid grid-2">
+<div class="card">
+<div class="title"><span class="icon">🛢️</span> PetroChina — Key Financials</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Metric</th><th>FY2025</th><th>FY2024</th><th>Change</th></tr></thead>
+<tbody>
+<tr><td>Revenue (RMB M)</td><td>2,864,469</td><td>2,937,981</td><td class="down">-2.5%</td></tr>
+<tr><td>Gross Profit</td><td>959,518</td><td>999,888</td><td class="down">-4.0%</td></tr>
+<tr><td>Gross Margin</td><td>33.5%</td><td>34.0%</td><td class="down">-50 bps</td></tr>
+<tr><td>Operating Income</td><td>229,885</td><td>248,158</td><td class="down">-7.4%</td></tr>
+<tr><td>Net Income</td><td>157,318</td><td>164,684</td><td class="down">-4.5%</td></tr>
+<tr><td>EPS (RMB)</td><td>0.86</td><td>0.90</td><td class="down">-4.4%</td></tr>
+<tr><td>Free Cash Flow</td><td>120,189</td><td>—</td><td class="up">Strong</td></tr>
+<tr><td>Dividend (Final)</td><td>RMB 0.25/share</td><td>—</td><td class="up">~RMB 45.8B total</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="card">
+<div class="title">Segment Revenue Breakdown</div>
+<div class="chart-wrap"><canvas id="petroSegmentChart"></canvas></div>
+</div>
+</div>
+
+<div class="grid grid-3" style="margin-top:4px">
+<div class="card">
+<div class="title">Oil & Gas Production</div>
+<div style="padding:4px 0">
+<div style="background:rgba(79,195,247,.06);border-radius:8px;padding:12px;border-left:3px solid #4fc3f7">
+<div style="font-weight:600;color:#4fc3f7;font-size:.82rem">1,841.9M boe (+2.5%)</div>
+<div style="color:#a0a0b8;font-size:.75rem;margin-top:4px">Crude oil: 939.4M bbls<br>Natural gas: 5,169.7B cf (+5.4%)<br>Gas sales: 314.7B cm (+7.0%)</div>
+</div>
+<div style="margin-top:8px;font-size:.72rem;color:#6a6a8a">Strategically transitioning to natural gas growth</div>
+</div>
+</div>
+<div class="card">
+<div class="title">Downstream Operations</div>
+<div style="padding:4px 0">
+<div style="background:rgba(255,167,38,.06);border-radius:8px;padding:12px;border-left:3px solid #ffa726">
+<div style="font-weight:600;color:#ffa726;font-size:.82rem">Refining & Chemicals</div>
+<div style="color:#a0a0b8;font-size:.75rem;margin-top:4px">Refinery throughput maintained<br>Chemical margins under pressure<br>Marketing: retail network expansion</div>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="title">Valuation & Returns</div>
+<div style="padding:4px 0">
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.75rem">P/E</span><span style="color:#fff;font-size:.82rem">9.18x</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.75rem">P/B</span><span style="color:#fff;font-size:.82rem">0.89x</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.75rem">Div Yield</span><span class="up" style="font-size:.82rem">6.26%</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.75rem">ROE</span><span style="color:#fff;font-size:.82rem">9.6%</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;">
+<span style="color:#7a7a9a;font-size:.75rem">Analyst Target</span><span class="up" style="font-size:.82rem">HK$12.17 (+29%)</span></div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- TAB: CNOOC -->
+<div id="tab-cnooc" class="tab-content" style="display:none">
+<div class="grid grid-2">
+<div class="card">
+<div class="title"><span class="icon">🌊</span> CNOOC — Key Financials</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Metric</th><th>FY2025</th><th>FY2024</th><th>Change</th></tr></thead>
+<tbody>
+<tr><td>Revenue (RMB M)</td><td>398,220</td><td>420,506</td><td class="down">-5.3%</td></tr>
+<tr><td>Oil & Gas Sales Revenue</td><td>335,700</td><td>—</td><td class="down">Lower</td></tr>
+<tr><td>Net Profit</td><td>122,082</td><td>137,936</td><td class="down">-11.5%</td></tr>
+<tr><td>EPS (RMB)</td><td>2.57</td><td>2.90</td><td class="down">-11.4%</td></tr>
+<tr><td>Net Production (M boe)</td><td>777</td><td>~723</td><td class="up">+7.4%</td></tr>
+<tr><td>All-in Cost (US$/boe)</td><td>27.90</td><td>28.52</td><td class="up">-2.2%</td></tr>
+<tr><td>Operating Cash Flow</td><td>209.0B</td><td>—</td><td class="up">Strong</td></tr>
+<tr><td>Dividend (Annual)</td><td>HK$1.28/share</td><td>HK$1.40/share</td><td class="down">-8.6%</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="card">
+<div class="title">2026 Targets & Outlook</div>
+<div style="padding:4px 0">
+<div style="background:rgba(78,204,163,.06);border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid #4ecca3">
+<div style="font-weight:600;color:#4ecca3;font-size:.82rem">Production Target 2026</div>
+<div style="color:#a0a0b8;font-size:.75rem;margin-top:4px">780-800M boe (record high, +3-5% growth)</div>
+</div>
+<div style="background:rgba(79,195,247,.06);border-radius:8px;padding:12px;margin-bottom:8px;border-left:3px solid #4fc3f7">
+<div style="font-weight:600;color:#4fc3f7;font-size:.82rem">Capex Budget 2026</div>
+<div style="color:#a0a0b8;font-size:.75rem;margin-top:4px">RMB 112-122B — maintaining investment for production growth</div>
+</div>
+<div style="background:rgba(255,167,38,.06);border-radius:8px;padding:12px;border-left:3px solid #ffa726">
+<div style="font-weight:600;color:#ffa726;font-size:.82rem">Dividend Policy 2025-2027</div>
+<div style="color:#a0a0b8;font-size:.75rem;margin-top:4px">Minimum 45% payout ratio. Annual dividend HK$1.28/share.</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="grid grid-3" style="margin-top:4px">
+<div class="card">
+<div class="title">Reserves & Resources</div>
+<div style="padding:4px 0">
+<div style="background:rgba(78,204,163,.06);border-radius:8px;padding:12px;border-left:3px solid #4ecca3">
+<div style="font-weight:600;color:#4ecca3;font-size:.82rem">Net Proved Reserves: 7,773M boe</div>
+<div style="color:#a0a0b8;font-size:.75rem;margin-top:4px">Record high reserve base<br>6 new discoveries, 28 appraisals<br>Guyana, Iraq, Kazakhstan, Indonesia</div>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="title">Cost Advantage</div>
+<div style="padding:4px 0">
+<div style="background:rgba(79,195,247,.06);border-radius:8px;padding:12px;border-left:3px solid #4fc3f7">
+<div style="font-weight:600;color:#4fc3f7;font-size:.82rem">All-in Cost: US$27.90/boe</div>
+<div style="color:#a0a0b8;font-size:.75rem;margin-top:4px">Industry-leading cost structure<br>Opex: US$7.61/boe<br>Resilient even at $50/bbl Brent</div>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="title">Growth & Returns</div>
+<div style="padding:4px 0">
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.75rem">P/E (Est.)</span><span style="color:#fff;font-size:.82rem">~8.5x</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.75rem">ROE</span><span class="up" style="font-size:.82rem">~19%</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.75rem">Net Margin</span><span class="up" style="font-size:.82rem">30.7%</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+<span style="color:#7a7a9a;font-size:.75rem">Prod. Growth</span><span class="up" style="font-size:.82rem">+7.4%</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;">
+<span style="color:#7a7a9a;font-size:.75rem">Div Yield</span><span style="color:#fff;font-size:.82rem">~5.1%</span></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="verdict">
+<h3>Investment Summary</h3>
+<p>
+<strong style="color:#4fc3f7">PetroChina (0857.HK)</strong> — Integrated oil giant with diversified upstream + downstream operations. Revenue 7x larger than CNOOC. Higher dividend yield (6.26%) and cheaper on P/B (0.89x). However, lower ROE (9.6%) and net margins (5.5%) due to heavy downstream/chemical exposure. Revenue/profit declining due to lower oil prices. Analyst target HK$12.17 (+29% upside). Better for value/income investors.
+<br><br>
+<strong style="color:#ffa726">CNOOC (0883.HK)</strong> — Upstream pure-play with industry-leading cost structure ($27.90/boe). Higher ROE (19%), net margins (30.7%), and faster production growth (+7.4%). Record reserves of 7,773M boe. More leveraged to oil price recovery. Capex of RMB 112-122B targeting 780-800M boe in 2026. Lower dividend yield (5.1%) but higher earnings quality. Better for growth + quality investors.
+<br><br>
+<strong style="color:#ffd166">Oil Price Context:</strong> Brent averaged $68.2 in 2025 (-15% YoY), pressuring both. A recovery to $75+ would significantly benefit CNOOC (upstream leverage), while PetroChina's downstream/refining acts as a partial hedge. Both offer defensive high-dividend exposure in the HK market.
+</p>
+</div>
+
+<footer>
+Data sourced from PetroChina & CNOOC 2025 Annual Reports, HKEX filings, Yahoo Finance, Bloomberg. For informational purposes only.
+</footer>
+</div>
+
+<script>
+document.querySelectorAll('.tab-btn').forEach(b=>{
+b.addEventListener('click',function(){
+document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
+this.classList.add('active');
+document.querySelectorAll('.tab-content').forEach(c=>c.style.display='none');
+document.getElementById('tab-'+this.dataset.tab).style.display='block';
+})});
+
+const cf={color:'#5a5a7a',borderColor:'rgba(255,255,255,.03)',
+plugins:{legend:{labels:{color:'#a0a0b8',font:{size:9},boxWidth:10}}},
+scales:{x:{ticks:{color:'#5a5a7a',font:{size:8}},grid:{color:'rgba(255,255,255,.02)'}},
+y:{ticks:{color:'#5a5a7a',font:{size:8}},grid:{color:'rgba(255,255,255,.02)'}}}};
+
+new Chart(document.getElementById('revCompareChart'),{type:'bar',data:{
+labels:['FY2021','FY2022','FY2023','FY2024','FY2025'],
+datasets:[
+{label:'PetroChina (RMB B)',data:[2614,3239,3013,2938,2864],backgroundColor:'rgba(79,195,247,.7)',borderRadius:4},
+{label:'CNOOC (RMB B)',data:[248.7,432.2,421.5,420.5,398.2],backgroundColor:'rgba(255,167,38,.7)',borderRadius:4}
+]},
+options:{...cf,responsive:true,maintainAspectRatio:false,
+plugins:{...cf.plugins,legend:{position:'top'}},
+scales:{...cf.scales,y:{...cf.scales.y,beginAtZero:true}}}});
+
+new Chart(document.getElementById('profitCompareChart'),{type:'bar',data:{
+labels:['FY2021','FY2022','FY2023','FY2024','FY2025'],
+datasets:[
+{label:'PetroChina (RMB B)',data:[92.2,148.7,161.4,164.7,157.3],backgroundColor:'rgba(79,195,247,.7)',borderRadius:4},
+{label:'CNOOC (RMB B)',data:[70.3,141.7,123.8,137.9,122.1],backgroundColor:'rgba(255,167,38,.7)',borderRadius:4}
+]},
+options:{...cf,responsive:true,maintainAspectRatio:false,
+plugins:{...cf.plugins,legend:{position:'top'}},
+scales:{...cf.scales,y:{...cf.scales.y,beginAtZero:true}}}});
+
+new Chart(document.getElementById('revTrendMini'),{type:'line',data:{
+labels:['2021','2022','2023','2024','2025'],
+datasets:[
+{label:'PetroChina',data:[2614,3239,3013,2938,2864],borderColor:'#4fc3f7',tension:.3,pointRadius:3},
+{label:'CNOOC',data:[248.7,432.2,421.5,420.5,398.2],borderColor:'#ffa726',tension:.3,pointRadius:3}
+]},
+options:{...cf,responsive:true,maintainAspectRatio:false,
+plugins:{...cf.plugins,legend:{position:'top'}}}});
+
+new Chart(document.getElementById('marginChart'),{type:'bar',data:{
+labels:['Net Margin'],
+datasets:[
+{label:'PetroChina',data:[5.5],backgroundColor:'rgba(79,195,247,.7)',borderRadius:4},
+{label:'CNOOC',data:[30.7],backgroundColor:'rgba(255,167,38,.7)',borderRadius:4}
+]},
+options:{...cf,responsive:true,maintainAspectRatio:false,
+plugins:{...cf.plugins,legend:{position:'top'}},
+scales:{...cf.scales,y:{...cf.scales.y,beginAtZero:true}}}});
+
+new Chart(document.getElementById('peChart'),{type:'bar',data:{
+labels:['P/E (Trailing)'],
+datasets:[
+{label:'PetroChina',data:[9.18],backgroundColor:'rgba(79,195,247,.7)',borderRadius:4},
+{label:'CNOOC',data:[8.5],backgroundColor:'rgba(255,167,38,.7)',borderRadius:4}
+]},
+options:{...cf,responsive:true,maintainAspectRatio:false,
+plugins:{...cf.plugins,legend:{position:'top'}},
+scales:{...cf.scales,y:{...cf.scales.y,beginAtZero:true}}}});
+
+new Chart(document.getElementById('petroSegmentChart'),{type:'doughnut',data:{
+labels:['Exploration & Production','Refining & Chemicals','Marketing','Natural Gas & Pipeline','Other'],
+datasets:[{data:[42,28,18,10,2],
+backgroundColor:['#4fc3f7','#ef5350','#4ecca3','#ffa726','rgba(255,255,255,.1)'],
+borderColor:'#07070f',borderWidth:2}]
+},options:{...cf,cutout:'60%',responsive:true,maintainAspectRatio:false,
+plugins:{...cf.plugins,legend:{position:'right',labels:{...cf.plugins.legend.labels,font:{size:8}}}}}});
+</script>
+</body>
+</html>
